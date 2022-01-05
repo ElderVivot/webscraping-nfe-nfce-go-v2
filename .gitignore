@@ -1,0 +1,7 @@
+node_modules/
+.env
+dist/
+logs/
+test.*
+*.log
+*.ps1
