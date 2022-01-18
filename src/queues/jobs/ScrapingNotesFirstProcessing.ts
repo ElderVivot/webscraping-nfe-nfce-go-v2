@@ -1,8 +1,8 @@
 import 'dotenv/config'
 
-import { ISettingsNFeGoias } from '../../scrapings/nfegoias/ISettingsNFeGoias'
-import { MainNFGoiasAddQueueToProcess } from '../../scrapings/nfegoias/MainNFGoiasAddQueueToProcess'
-import { prepareCertificateRegedit } from '../../services/certificates/windows/prepare-certificate-regedit'
+import { ISettingsNFeGoias } from '@scrapings/_ISettingsNFeGoias'
+import { MainNFGoiasAddQueueToProcess } from '@scrapings/MainNFGoiasAddQueueToProcess'
+import { prepareCertificateRegedit } from '@services/certificates/windows/prepare-certificate-regedit'
 
 export const ScrapingNotesFirstProcessing = {
     key: 'ScrapingNotesFirstProcessing',
@@ -12,8 +12,6 @@ export const ScrapingNotesFirstProcessing = {
 
         await MainNFGoiasAddQueueToProcess({
             wayCertificate: settings.wayCertificate,
-            hourLog: settings.hourLog,
-            dateHourProcessing: settings.dateHourProcessing,
             nameCompanie: certificate.nameCertificate
         })
         await new Promise((resolve) => setTimeout(() => resolve(''), 1000))

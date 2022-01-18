@@ -3,7 +3,7 @@ import { Browser, Page } from 'puppeteer'
 
 import SaveLogNfeNfceGO from '../../controllers/SaveLogNfeNfceGO'
 // import createFolderToSaveData from '../../utils/CreateFolderToSaveData'
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 
 export class TreatsMessageLogNFeGoias {
     private page: Page

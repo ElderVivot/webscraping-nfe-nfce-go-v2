@@ -30,6 +30,7 @@
     "got": "11.8.0",
     "node-powershell": "4.0.0",
     "pem": "1.14.4",
+    "pino": "^7.6.3",
     "promise-poller": "1.9.1",
     "puppeteer": "5.4.1",
     "request": "2.88.2",
@@ -46,6 +47,7 @@
     "@types/fs-extra": "9.0.4",
     "@types/node": "14.0.14",
     "@types/node-powershell": "3.1.1",
+    "@types/pino": "^7.0.5",
     "@types/promise-poller": "1.7.0",
     "@types/puppeteer": "5.4.2",
     "@types/request-promise-native": "1.0.17",
@@ -60,8 +62,10 @@
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "4.2.1",
     "eslint-plugin-standard": "4.0.1",
+    "pino-pretty": "^7.3.0",
     "ts-node": "8.10.2",
     "ts-node-dev": "1.0.0-pre.50",
+    "tsconfig-paths": "^3.12.0",
     "typescript": "3.9.6"
   },
   "keywords": []

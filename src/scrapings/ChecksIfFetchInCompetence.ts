@@ -3,7 +3,7 @@ import { Page } from 'puppeteer'
 
 import GetLogFetchCompetence from '../../controllers/GetLogFetchCompetence'
 import GetLogFetchCompetenceWarnSuccess from '../../controllers/GetLogFetchCompetenceWarnSuccess'
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 export async function ChecksIfFetchInCompetence (page: Page, settings: ISettingsNFeGoias): Promise<void> {

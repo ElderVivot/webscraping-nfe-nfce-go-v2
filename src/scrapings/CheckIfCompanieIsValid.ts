@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer'
 
 import GetCompanie from '../../services/GetCompanie'
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 import 'dotenv/config'

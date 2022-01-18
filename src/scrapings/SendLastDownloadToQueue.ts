@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer'
 
 import SaveXMLsNFeNFCGO from '../../queues/lib/SaveXMLsNFeNFCGO'
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 interface IElementDownload {

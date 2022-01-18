@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer'
 
 import { treateTextField } from '../../utils/functions'
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 export async function CheckIfSemResultados (page: Page, settings: ISettingsNFeGoias): Promise<void> {

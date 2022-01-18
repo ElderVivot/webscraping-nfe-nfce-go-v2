@@ -5,7 +5,7 @@ import 'dotenv/config'
 
 // import GetSettingsWayFiles from '../controllers/GetSettingsWayFiles'
 import { treateTextField } from '../../utils/functions'
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 
 const mountFolder = (settings: ISettingsNFeGoias, folder: string) => {
     let newFolder = folder

@@ -3,7 +3,7 @@ import path from 'path'
 import { Browser, Page, Request } from 'puppeteer'
 import request, { CoreOptions } from 'request'
 
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 async function interceptRequest (interceptedRequest: Request, settings: ISettingsNFeGoias): Promise<void> {

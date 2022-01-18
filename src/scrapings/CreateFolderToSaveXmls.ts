@@ -1,8 +1,8 @@
 import path from 'path'
 import { Page } from 'puppeteer'
 
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { createFolderToSaveData } from './CreateFolderToSaveData'
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 export async function CreateFolderToSaveXmls (page: Page, settings: ISettingsNFeGoias): Promise<void> {

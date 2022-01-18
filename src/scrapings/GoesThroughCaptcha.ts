@@ -2,7 +2,7 @@ import { Page } from 'puppeteer'
 
 import { promiseTimeOut } from '../../utils/promise-timeout'
 import { initiateCaptchaRequest, pollForRequestResults } from '../2captcha'
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 const siteDetails = {

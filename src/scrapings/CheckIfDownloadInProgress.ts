@@ -1,7 +1,7 @@
 import { Page } from 'puppeteer'
 
 import { promiseTimeOut } from '../../utils/promise-timeout'
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 async function downloadInProgress (page: Page): Promise<string> {

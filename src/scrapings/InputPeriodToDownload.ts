@@ -1,7 +1,7 @@
 import { format, zonedTimeToUtc } from 'date-fns-tz'
 import { Page } from 'puppeteer'
 
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 export async function InputPeriodToDownload (page: Page, settings: ISettingsNFeGoias): Promise<void> {

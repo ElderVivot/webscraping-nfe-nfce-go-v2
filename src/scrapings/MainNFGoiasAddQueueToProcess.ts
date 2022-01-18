@@ -5,10 +5,10 @@ import 'dotenv/config'
 
 import { cleanDataObject } from '../../utils/clean-data-object'
 import * as functions from '../../utils/functions'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { CheckIfCompanieIsValid } from './CheckIfCompanieIsValid'
 import { ChecksIfFetchInCompetence } from './ChecksIfFetchInCompetence'
 import { GetCnpjs } from './GetCnpjs'
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
 // import { LoguinCertificadoInterceptRequest } from './LoguinCertificadoInterceptRequest'
 import { LoguinCertificado } from './LoguinCertificado'
 import { PeriodToDownNFeGoias } from './PeriodToDownNFeGoias'
@@ -86,7 +86,7 @@ export async function MainNFGoiasAddQueueToProcess (settings: ISettingsNFeGoias 
                                 const monthSring = functions.zeroLeft(month.toString(), 2)
                                 console.log(`\t7- Iniciando processamento do mês ${monthSring}/${year}`)
                                 //  clean settings to old don't affect new process
-                                settings = cleanDataObject(settings, [], ['wayCertificate', 'hourLog', 'dateHourProcessing', 'cgceCompanie', 'modelNF', 'situacaoNF', 'situacaoNFDescription', 'typeNF', 'typeLog'])
+                                settings = cleanDataObject(settings, [], ['wayCertificate', 'cgceCompanie', 'modelNF', 'situacaoNF', 'situacaoNFDescription', 'typeNF', 'typeLog'])
 
                                 try {
                                     const dateInicialAndFinalOfMonth = await SetDateInicialAndFinalOfMonth(page, settings, periodToDown, month, year)

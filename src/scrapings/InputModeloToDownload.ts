@@ -1,6 +1,6 @@
 import { Page } from 'puppeteer'
 
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 export async function InputModeloToDownload (page: Page, settings: ISettingsNFeGoias): Promise<void> {

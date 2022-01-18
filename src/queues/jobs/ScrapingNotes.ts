@@ -2,7 +2,7 @@
 import 'dotenv/config'
 
 import { ISettingsNFeGoias } from '../../scrapings/nfegoias/ISettingsNFeGoias'
-import { MainNFGoias } from '../../scrapings/nfegoias/MainNFGoias'
+import { MainNFGoias } from '../../scrapings/nfegoias/MainNFGoiasProcessTheQueue'
 import { prepareCertificateRegedit } from '../../services/certificates/windows/prepare-certificate-regedit'
 // import { DeleteFolder } from '../../services/delete-folders'
 
@@ -14,8 +14,6 @@ const ScrapingNotes = {
 
         await MainNFGoias({
             wayCertificate: settings.wayCertificate,
-            hourLog: settings.hourLog,
-            dateHourProcessing: settings.dateHourProcessing,
             nameCompanie: certificate.nameCertificate,
             id: settings.id,
             cgceCompanie: settings.cgceCompanie,

@@ -1,6 +1,6 @@
 import { Page, Browser } from 'puppeteer'
 
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 export async function LoguinCertificado (page: Page, browser: Browser, settings: ISettingsNFeGoias): Promise<void> {

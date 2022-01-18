@@ -3,7 +3,7 @@ import { Page } from 'puppeteer'
 import GetMaxDateDownNfeNfcePerMonth from '../../controllers/GetMaxDateDownNfeNfcePerMonth'
 import IPeriodToDownNotes from '../../models/IPeriodToDownNotes'
 import * as functions from '../../utils/functions'
-import { ISettingsNFeGoias } from './ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 interface IDateInicialAndFinal {
