@@ -3,7 +3,8 @@ import fs from 'fs'
 import path from 'path'
 import util from 'util'
 
-import { listFiles } from '../../../utils/get-list-files-of-folder'
+import { logger } from '@common/log'
+import { listFiles } from '@utils/get-list-files-of-folder'
 
 const execAsync = util.promisify(exec)
 
@@ -28,7 +29,11 @@ export async function installCertificate (fileCertificate: string): Promise<void
         // it's necessary to set certificate regedit, only await in line acima don't suficient
         await new Promise((resolve) => setTimeout(() => resolve(''), 2000))
     } catch (error) {
-        console.log('Error to install-certificate: ' + error)
+        logger.error({
+            msg: '- Error to install-certificate: ',
+            locationFile: __filename,
+            error
+        })
     }
 }
 

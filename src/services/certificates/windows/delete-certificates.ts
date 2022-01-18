@@ -1,7 +1,9 @@
 import { exec } from 'child_process'
 import util from 'util'
 
-import { todayLocale } from '../../../utils/treat-date'
+import { logger } from '@common/log'
+import { todayLocale } from '@utils/treat-date'
+
 import { ICertifate } from '../i-certificate'
 import { mainGetCertificates } from './get-all-certificates-user-my'
 
@@ -22,10 +24,14 @@ export async function mainDeleteCertificates (deleteOnlyExpired = true): Promise
         if (checkIfCertificateIsExpired(certificate) || !deleteOnlyExpired) {
             const { stdout, stderr } = await execAsync(`certutil -delstore -user My ${certificate.numeroSerie}`)
             if (stdout) {
-                console.log(`- Certificado ${certificate.requerenteCN} deletado com sucesso`)
+                logger.info(`- Certificado ${certificate.requerenteCN} deletado com sucesso`)
             }
             if (stderr) {
-                console.log('- Erro ao deletar certificado: ', stderr)
+                logger.error({
+                    msg: '- Erro ao deletar certificado: ',
+                    locationFile: __filename,
+                    error: stderr
+                })
             }
         }
     }

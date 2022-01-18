@@ -1,8 +1,10 @@
 import { exec } from 'child_process'
 import util from 'util'
 
-import { convertStringToDate } from '../../../utils/treat-date'
-import { treatText } from '../../../utils/treat-text'
+import { logger } from '@common/log'
+import { convertStringToDate } from '@utils/treat-date'
+import { treatText } from '@utils/treat-text'
+
 import { ICertifate } from '../i-certificate'
 
 const execAsync = util.promisify(exec)
@@ -69,7 +71,11 @@ export async function mainGetCertificates (): Promise<ICertifate[]> {
         getDataCertificate(stdoutSplit)
     }
     if (stderr) {
-        console.log('- Erro ao ler certificados instalados em Usuario/Pessoal: ', stderr)
+        logger.error({
+            msg: '- Erro ao ler certificados instalados em Usuario/Pessoal: ',
+            locationFile: __filename,
+            error: stderr
+        })
     }
     return certificates
 }

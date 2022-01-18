@@ -2,7 +2,9 @@ import { promises as fs } from 'fs'
 import fsExtra from 'fs-extra'
 import path from 'path'
 
-import { listFiles } from '../../utils/get-list-files-of-folder'
+import { logger } from '@common/log'
+import { listFiles } from '@utils/get-list-files-of-folder'
+
 import { ReadCertificate } from './read-certificate'
 
 const getPasswordOfNameFile = (file: string, passwordDefault: string): string => {
@@ -15,7 +17,11 @@ const getPasswordOfNameFile = (file: string, passwordDefault: string): string =>
         const password = textWithPasswordSplit[0].replace(extensionFile, '')
         return password
     } catch (error) {
-        console.log(error)
+        logger.error({
+            msg: 'Error to get password of name file',
+            locationFile: __filename,
+            error
+        })
         return ''
     }
 }
@@ -37,9 +43,13 @@ const identifiesPasswordDefault = (word: string, file: string): string => {
 export async function OrganizeCertificates (directory: string, directoryToCopy: string): Promise<void> {
     try {
         await fs.rmdir(directoryToCopy, { recursive: true })
-        console.log('- Directory with certificates deleted.')
+        logger.info('- Directory with certificates deleted.')
     } catch (error) {
-        console.log('- Error delete directory with certificate.')
+        logger.error({
+            msg: '- Error delete directory with certificate.',
+            locationFile: __filename,
+            error
+        })
     }
     fsExtra.mkdirSync(directoryToCopy)
     const files = await listFiles(directory)

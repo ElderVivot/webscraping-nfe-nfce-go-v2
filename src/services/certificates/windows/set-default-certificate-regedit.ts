@@ -4,6 +4,8 @@ import fs from 'fs'
 import path from 'path'
 import util from 'util'
 
+import { logger } from '@common/log'
+
 import { ICertifate } from '../i-certificate'
 
 const execAsync = util.promisify(exec)
@@ -18,7 +20,13 @@ exit`
         pathSetDefaultCertificateRegedit,
         textCommand,
         error => {
-            if (error) console.log(error)
+            if (error) {
+                logger.error({
+                    msg: '- Error to set default certificate regedig',
+                    locationFile: __filename,
+                    error
+                })
+            }
         }
     )
     await execAsync(`powershell -Command "Start-Process powershell -ArgumentList '-noprofile -file ${pathSetDefaultCertificateRegedit}' -Verb RunAs`)
