@@ -1,9 +1,10 @@
 import { exec } from 'child_process'
 import util from 'util'
 
+import { IDateAdapter } from '@common/adapters/date/date-adapter'
+import { makeDateImplementation } from '@common/adapters/date/date-factory'
 import { logger } from '@common/log'
-import { convertStringToDate } from '@utils/treat-date'
-import { treatText } from '@utils/treat-text'
+import { treateTextFieldTwo as treatText } from '@utils/functions'
 
 import { ICertifate } from '../i-certificate'
 
@@ -22,7 +23,7 @@ function clearDataCertificate (): ICertifate {
 
 const certificates: Array<ICertifate> = []
 
-function getDataCertificate (stdoutSplit: Array<string>): void {
+function getDataCertificate (dateFactory: IDateAdapter, stdoutSplit: Array<string>): void {
     let certificate: ICertifate
     for (const line of stdoutSplit) {
         if (!line) continue
@@ -35,9 +36,9 @@ function getDataCertificate (stdoutSplit: Array<string>): void {
         } else if (lineFormated.indexOf('NMERO DE SRIE:') >= 0) {
             certificate.numeroSerie = fieldTwo
         } else if (lineFormated.indexOf('NOTBEFORE:') >= 0) {
-            certificate.notBefore = convertStringToDate(fieldTwo.substring(0, 10), 'dd/MM/yyyy')
+            certificate.notBefore = dateFactory.parseDate(fieldTwo.substring(0, 10), 'dd/MM/yyyy')
         } else if (lineFormated.indexOf('NOTAFTER:') >= 0) {
-            certificate.notAfter = convertStringToDate(fieldTwo.substring(0, 10), 'dd/MM/yyyy')
+            certificate.notAfter = dateFactory.parseDate(fieldTwo.substring(0, 10), 'dd/MM/yyyy')
         } else if (lineFormated.indexOf('REQUERENTE:') >= 0) {
             let requerenteOU = ''
             certificate.requerenteCN = lineTrim.split('CN=')[1].split(',')[0]
@@ -63,12 +64,14 @@ function getDataCertificate (stdoutSplit: Array<string>): void {
 }
 
 export async function mainGetCertificates (): Promise<ICertifate[]> {
+    const dateFactory = makeDateImplementation()
+
     certificates.splice(0, certificates.length)
     const { stdout, stderr } = await execAsync('certutil -store -user My')
     let stdoutSplit: Array<string>
     if (stdout) {
         stdoutSplit = stdout.split('\r\n')
-        getDataCertificate(stdoutSplit)
+        getDataCertificate(dateFactory, stdoutSplit)
     }
     if (stderr) {
         logger.error({

@@ -1,6 +1,6 @@
 import { Page, Browser } from 'puppeteer'
 
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_interfaces'
 import { IOptionsCnpjsGoias } from './IOptionsCnpjsGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
@@ -24,8 +24,7 @@ export async function GetCnpjs (page: Page, browser: Browser, settings: ISetting
         settings.messageLog = 'GetCnpjs'
         settings.messageError = error
         settings.messageLogToShowUser = 'Erro ao capturar lista de CNPJs'
-        console.log(`[Final] - ${settings.messageLogToShowUser}`)
-        console.log('-------------------------------------------------')
+        settings.pathFile = __filename
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, browser)
         // dont save in database because dont have information necessary to reprocess

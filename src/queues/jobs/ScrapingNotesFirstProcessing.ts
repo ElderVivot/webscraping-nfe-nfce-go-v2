@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-import { ISettingsNFeGoias } from '@scrapings/_ISettingsNFeGoias'
+import { ISettingsNFeGoias } from '@scrapings/_interfaces'
 import { MainNFGoiasAddQueueToProcess } from '@scrapings/MainNFGoiasAddQueueToProcess'
 import { prepareCertificateRegedit } from '@services/certificates/windows/prepare-certificate-regedit'
 

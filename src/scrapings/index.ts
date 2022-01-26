@@ -6,7 +6,7 @@ import { scrapingNotesFirstProcessing } from '@queues/lib/ScrapingNotesFirstProc
 import { OrganizeCertificates } from '@services/certificates/organize-certificates'
 import { listFiles } from '@utils/get-list-files-of-folder'
 
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_interfaces'
 
 class Applicattion {
     async process (): Promise<void> {
@@ -22,10 +22,10 @@ class Applicattion {
                 await scrapingNotesFirstProcessing.add({
                     settings
                 })
-                logger.info({ msg: `-- Certificado ${fileCertificate} adicionado na fila` })
+                logger.info({ msg: `- Certificado ${fileCertificate} adicionado na fila` })
             } catch (error) {
                 logger.error({
-                    msg: `-- Erro ao adicionar na fila certificado ${fileCertificate}`,
+                    msg: `- Erro ao adicionar na fila certificado ${fileCertificate}`,
                     locationFile: __filename,
                     error
                 })

@@ -1,11 +1,22 @@
 
 import fs from 'fs'
-import path from 'path'
-import 'dotenv/config'
 
-// import GetSettingsWayFiles from '../controllers/GetSettingsWayFiles'
-import { treateTextField } from '../../utils/functions'
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
+import { treateTextField } from '@utils/functions'
+
+import { ISettingsNFeGoias } from './_interfaces'
+
+function typeNF (modelo: string): string {
+    if (modelo === '55') return 'NF-e'
+    else if (modelo === '57') return 'CT-e'
+    else if (modelo === '65') return 'NFC-e'
+    else return 'DESCONHECIDO'
+}
+
+function getDescriptionSituacaoNF (situacao: string): string {
+    if (situacao === '1') return 'Autorizadas'
+    else if (situacao === '2') return 'Canceladas'
+    else return 'DESCONHECIDO'
+}
 
 const mountFolder = (settings: ISettingsNFeGoias, folder: string) => {
     let newFolder = folder
@@ -16,23 +27,22 @@ const mountFolder = (settings: ISettingsNFeGoias, folder: string) => {
     }
 
     const nameCompanie = settings.nameCompanie ? treateTextField(settings.nameCompanie).substring(0, 70) : undefined
-    // const nameCompanie = settings.companie ? settings.companie.substring(0, 70) : undefined
+    settings.typeNF = typeNF(settings.modelNotaFiscal)
+    settings.situacaoNFDescription = getDescriptionSituacaoNF(settings.situationNotaFiscal)
 
     const folderSplit = newFolder.split('/')
     let folderComplete = ''
     for (const field of folderSplit) {
-        if (field === 'hourLog') {
-            folderComplete += settings.dateHourProcessing ? `${settings.dateHourProcessing}/` : ''
-        } else if (field === 'numeroSerie') {
+        if (field === 'numeroSerie') {
             folderComplete += settings.numeroSerie ? `${settings.numeroSerie}/` : ''
         } else if (field === 'typeLog') {
             folderComplete += settings.typeLog ? `${settings.typeLog}/` : ''
         } else if (field === 'nameCompanieWithCnpj') {
-            folderComplete += settings.nameCompanie && settings.cgceCompanie ? `${nameCompanie} - ${settings.cgceCompanie}/` : ''
+            folderComplete += settings.nameCompanie && settings.federalRegistration ? `${nameCompanie} - ${settings.federalRegistration}/` : ''
         } else if (field === 'cgce') {
-            folderComplete += settings.cgceCompanie ? `${settings.cgceCompanie}/` : ''
+            folderComplete += settings.federalRegistration ? `${settings.federalRegistration}/` : ''
         } else if (field === 'nameCompanieWithCodeCompanie') {
-            folderComplete += settings.nameCompanie && settings.codeCompanie ? `${nameCompanie} - ${settings.codeCompanie}/` : `${nameCompanie} - ${settings.cgceCompanie}/`
+            folderComplete += settings.nameCompanie && settings.codeCompanieAccountSystem ? `${nameCompanie} - ${settings.codeCompanieAccountSystem}/` : `${nameCompanie} - ${settings.codeCompanieAccountSystem}/`
         } else if (field === 'year') {
             folderComplete += settings.year ? `${settings.year}/` : ''
         } else if (field === 'month') {
@@ -44,9 +54,9 @@ const mountFolder = (settings: ISettingsNFeGoias, folder: string) => {
         } else if (field === 'situacaoNF') {
             folderComplete += settings.situacaoNFDescription ? `${settings.situacaoNFDescription}/` : ''
         } else if (field === 'codeCompanieWithNameCompanie') {
-            folderComplete += settings.nameCompanie && settings.codeCompanie ? `${settings.codeCompanie}-${nameCompanie}/` : `${nameCompanie} - ${settings.cgceCompanie}/`
+            folderComplete += settings.nameCompanie && settings.codeCompanieAccountSystem ? `${settings.codeCompanieAccountSystem}-${nameCompanie}/` : `${nameCompanie} - ${settings.federalRegistration}/`
         } else if (field === 'codeCompanieRotinaAutomatica') {
-            folderComplete += settings.codeCompanie ? `${settings.codeCompanie}-/` : ''
+            folderComplete += settings.codeCompanieAccountSystem ? `${settings.codeCompanieAccountSystem}-/` : ''
         } else if (field === 'monthYearRotinaAutomatica') {
             folderComplete += settings.year && settings.month ? `${settings.month}${settings.year}/` : ''
         } else if (field === 'monthYear') {
@@ -64,20 +74,17 @@ const mountFolder = (settings: ISettingsNFeGoias, folder: string) => {
 export async function createFolderToSaveData (settings: ISettingsNFeGoias, folderRoutineAutomactic = false): Promise<string> {
     const folderToSaveXMLs = process.env.FOLDER_TO_SAVE_XMLs
     const folderToSaveXMLsRotinaAutomatica = process.env.FOLDER_TO_SAVE_XMLs_ROT_AUT
-    const folderToSaveLog = path.resolve(__dirname, '..', '..', 'logs', 'goias', 'hourLog', 'numeroSerie', 'typeLog', 'nameCompanieWithCnpj', 'yearMonth')
     let folder = ''
 
     if (settings.typeLog === 'success' || settings.typeLog === 'processing') {
         folder = mountFolder(settings, folderToSaveXMLs)
-        if (folderRoutineAutomactic && settings.codeCompanie) {
+        if (folderRoutineAutomactic && settings.codeCompanieAccountSystem) {
             if (folderToSaveXMLsRotinaAutomatica) {
                 folder = mountFolder(settings, folderToSaveXMLsRotinaAutomatica)
             } else {
                 return ''
             }
         }
-    } else if (settings.typeLog === 'error' || settings.typeLog === 'warning') {
-        folder = mountFolder(settings, folderToSaveLog)
     }
 
     return folder

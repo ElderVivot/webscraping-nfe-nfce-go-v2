@@ -1,7 +1,7 @@
 import path from 'path'
 import { Page } from 'puppeteer'
 
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
+import { ISettingsNFeGoias } from './_interfaces'
 import { createFolderToSaveData } from './CreateFolderToSaveData'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
@@ -18,7 +18,7 @@ export async function CreateFolderToSaveXmls (page: Page, settings: ISettingsNFe
         })
     } catch (error) {
         // when already processing before then dont save in database again because duplicate registry of scraping, only save is reprocessing
-        const saveInDB = settings.typeLog !== 'processing' || !!settings.id
+        const saveInDB = settings.typeLog !== 'processing' || !!settings.idLogNotaFiscal
         settings.typeLog = 'error'
         settings.messageLog = 'CreateFolderToSaveXmls'
         settings.messageError = error

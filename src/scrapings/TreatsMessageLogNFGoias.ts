@@ -1,56 +1,85 @@
-// import path from 'path'
 import { Browser, Page } from 'puppeteer'
 
-import SaveLogNfeNfceGO from '../../controllers/SaveLogNfeNfceGO'
-// import createFolderToSaveData from '../../utils/CreateFolderToSaveData'
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
+import { IFetchAdapter } from '@common/adapters/fetch/fetch-adapter'
+import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
+import { handlesFetchError } from '@common/error/fetchError'
+import { logger } from '@common/log'
+
+import { ILogNotaFiscalApi, ISettingsNFeGoias } from './_interfaces'
+import { urlBaseApi } from './_urlBaseApi'
 
 export class TreatsMessageLogNFeGoias {
     private page: Page
     private browser: Browser | undefined
     private settings: ISettingsNFeGoias
     private noClosePage: boolean
-    // private pathImg = ''
+    private fetchFactory: IFetchAdapter
 
     constructor (page: Page, settings: ISettingsNFeGoias, browser?: Browser, noClosePage?: boolean) {
         this.page = page
         this.browser = browser
         this.settings = settings
         this.noClosePage = noClosePage
+        this.fetchFactory = makeFetchImplementation()
     }
 
     async saveLog (saveInDB = true): Promise<void> {
-        // this.pathImg = await createFolderToSaveData(this.settings)
-        // this.pathImg = path.resolve(this.pathImg, `${this.settings.messageLog}.png`)
-        // await this.page.screenshot({ path: this.pathImg, fullPage: true })
         if (!this.noClosePage) await this.page.close()
         if (this.browser) await this.browser.close()
 
         if (saveInDB) {
             if (this.settings.typeLog === 'error') { this.settings.qtdTimesReprocessed += 1 }
 
-            const saveLogNfeNfceGO = new SaveLogNfeNfceGO()
-            await saveLogNfeNfceGO.saveLog({
-                id: this.settings.id,
+            const dataToSave: ILogNotaFiscalApi = {
+                idLogNotaFiscal: this.settings.idLogNotaFiscal,
                 wayCertificate: this.settings.wayCertificate,
-                hourLog: this.settings.hourLog,
                 typeLog: this.settings.typeLog || 'error',
                 messageLog: this.settings.messageLog || '',
-                messageError: this.settings.messageError?.toString() || this.settings.messageError,
-                messageLogToShowUser: this.settings.messageLogToShowUser,
-                urlImageDown: '',
-                codeCompanie: this.settings.codeCompanie,
-                nameCompanie: this.settings.nameCompanie,
-                cgceCompanie: this.settings.cgceCompanie,
-                modelNF: this.settings.modelNF || '',
-                situacaoNF: this.settings.situacaoNF,
+                messageError: this.settings.messageError?.toString() || this.settings.messageError || '',
+                messageLogToShowUser: this.settings.messageLogToShowUser || '',
+                federalRegistration: this.settings.federalRegistration,
+                modelNotaFiscal: this.settings.modelNotaFiscal,
+                situationNotaFiscal: this.settings.situationNotaFiscal,
                 dateStartDown: this.settings.dateStartDown,
                 dateEndDown: this.settings.dateEndDown,
-                qtdNotesDown: this.settings.qtdNotes,
+                qtdNotesDown: this.settings.qtdNotes || 0,
                 qtdTimesReprocessed: this.settings.qtdTimesReprocessed || 0,
-                qtdPagesTotal: this.settings.qtdPagesTotal,
-                pageInicial: this.settings.pageInicial,
-                pageFinal: this.settings.pageFinal
+                pageInicial: this.settings.pageInicial || 0,
+                pageFinal: this.settings.pageFinal || 0,
+                qtdPagesTotal: this.settings.qtdPagesTotal || 0
+            }
+
+            const urlBase = `${urlBaseApi}/log_nota_fiscal`
+            try {
+                if (this.settings.idLogNotaFiscal) {
+                    await this.fetchFactory.put<ILogNotaFiscalApi[]>(
+                        `${urlBase}/${this.settings.idLogNotaFiscal}`,
+                        { ...dataToSave },
+                        { headers: { tenant: process.env.TENANT } }
+                    )
+                } else {
+                    await this.fetchFactory.post<ILogNotaFiscalApi[]>(
+                        `${urlBase}`,
+                        { ...dataToSave },
+                        { headers: { tenant: process.env.TENANT } }
+                    )
+                }
+            } catch (error) {
+                handlesFetchError(error)
+            }
+        }
+
+        if (this.settings.typeLog === 'warning') {
+            logger.warn({
+                msg: this.settings.messageLogToShowUser,
+                locationFile: this.settings.pathFile,
+                error: this.settings.error
+            })
+        } else if (this.settings.typeLog === 'error') {
+            logger.error({
+                msg: this.settings.messageLogToShowUser,
+                locationFile: this.settings.pathFile,
+                error: this.settings.error
             })
         }
 

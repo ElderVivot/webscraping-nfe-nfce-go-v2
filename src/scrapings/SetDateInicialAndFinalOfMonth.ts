@@ -1,61 +1,80 @@
 import { Page } from 'puppeteer'
 
-import GetMaxDateDownNfeNfcePerMonth from '../../controllers/GetMaxDateDownNfeNfcePerMonth'
-import IPeriodToDownNotes from '../../models/IPeriodToDownNotes'
-import * as functions from '../../utils/functions'
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
+import { makeDateImplementation } from '@common/adapters/date/date-factory'
+import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
+import { handlesFetchError } from '@common/error/fetchError'
+import { firstAndLastDayOfMonth } from '@utils/functions'
+
+import { ILogNotaFiscalApi, ISettingsNFeGoias } from './_interfaces'
+import { urlBaseApi } from './_urlBaseApi'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
-interface IDateInicialAndFinal {
-    inicialDate: string
-    finalDate: string
-}
-
-export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISettingsNFeGoias, periodToDown: IPeriodToDownNotes, month: number, year: number): Promise<IDateInicialAndFinal> {
+export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISettingsNFeGoias, month: number, year: number, dateFinalOfPeriodToDown: Date): Promise<{initialDate: Date, finalDate: Date}> {
     try {
-        let initialDate: Date
-        let finalDate: Date
+        const dateFactory = makeDateImplementation()
+        const fetchFactory = makeFetchImplementation()
+        const today = new Date()
+        const todaySubdays = dateFactory.subDays(today, 31)
 
-        const yearFinal = periodToDown.dateEnd.getFullYear()
-        const monthFinal = periodToDown.dateEnd.getMonth() + 1
+        const { firstDay, lastDay } = firstAndLastDayOfMonth(month, year)
+        const firstDayString = dateFactory.formatDate(firstDay, 'yyyy-MM-dd')
+        const lastDayString = dateFactory.formatDate(lastDay, 'yyyy-MM-dd')
 
-        if (settings.reprocessingFetchErrorsOrProcessing) {
-            initialDate = periodToDown.dateStart
-            finalDate = periodToDown.dateEnd
-        } else {
-            const daysInitialAndFinalOfMonth = functions.daysInitialAndEndOfMonth(month, year)
-
-            const getMaxDateDownNfeNfcePerMonth = new GetMaxDateDownNfeNfcePerMonth()
-            const dataLog = await getMaxDateDownNfeNfcePerMonth.show(`?cgceCompanie=${settings.cgceCompanie}&modelNF=${settings.modelNF}&situacaoNF=${settings.situacaoNF}&month=${month}&year=${year}`)
-            const { datedownmax } = dataLog
-            if (datedownmax) {
-                const dateDownMax = new Date(datedownmax)
-                const dayDownMax = dateDownMax.getDate()
-                initialDate = new Date(year, month - 1, dayDownMax)
-            } else {
-                initialDate = daysInitialAndFinalOfMonth.dateInitial
-            }
-
-            if (month === monthFinal && year === yearFinal) {
-                finalDate = periodToDown.dateEnd
-            } else {
-                finalDate = daysInitialAndFinalOfMonth.dateFinal
-            }
+        if (settings.situationNotaFiscal === '2' && todaySubdays > lastDay) {
+            throw 'NOTE_CANCELED_DONT_DOWN_SEPARATELY_IF_MORE_31_DAYS'
         }
 
-        return {
-            inicialDate: functions.convertDateToString(initialDate),
-            finalDate: functions.convertDateToString(finalDate)
+        const getFinalDate = () => {
+            const yearFinal = dateFinalOfPeriodToDown.getFullYear()
+            const monthFinal = dateFinalOfPeriodToDown.getMonth() + 1
+            if (month === monthFinal && year === yearFinal) return dateFinalOfPeriodToDown
+            else return lastDay
+        }
+
+        const urlBase = `${urlBaseApi}/log_nota_fiscal`
+        const urlFilter = `?federalRegistration=${settings.federalRegistration}&modelNotaFiscal=${settings.modelNotaFiscal}&situationNotaFiscal=${settings.situationNotaFiscal}&dateStartDownBetween=${firstDayString}&dateEndDownBetween=${lastDayString}`
+        const response = await fetchFactory.get<ILogNotaFiscalApi[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
+        const data = response.data
+        if (data.length > 0) {
+            const logNotaFiscal = data[data.length - 1]
+            const dayDownMax = new Date(logNotaFiscal.dateEndDown).getDate()
+
+            const initialDate = new Date(year, month - 1, dayDownMax + 1)
+            const finalDate = getFinalDate()
+            if (initialDate >= finalDate) {
+                throw 'DONT_HAVE_NEW_PERIOD_TO_PROCESS'
+            }
+
+            return {
+                initialDate,
+                finalDate
+            }
+        } else {
+            return {
+                initialDate: firstDay,
+                finalDate: getFinalDate()
+            }
         }
     } catch (error) {
+        let saveInDB = true
         settings.typeLog = 'error'
         settings.messageLog = 'SetDateInicialAndFinalOfMonth'
         settings.messageError = error
-        settings.messageLogToShowUser = 'Erro ao verificar o período pra baixar.'
-        console.log(`\t[Final-Empresa-Mes] - ${settings.messageLogToShowUser}`)
-        console.log('\t-------------------------------------------------')
+        settings.messageLogToShowUser = 'Erro ao buscar o periodo do mes pra download.'
+        if (error === 'DONT_HAVE_NEW_PERIOD_TO_PROCESS') {
+            saveInDB = false
+            settings.typeLog = 'warning'
+            settings.messageLogToShowUser = 'Nao ha um novo periodo pra processar, ou seja, o ultimo processamento ja buscou o periodo maximo.'
+        }
+        if (error === 'NOTE_CANCELED_DONT_DOWN_SEPARATELY_IF_MORE_31_DAYS') {
+            saveInDB = false
+            settings.typeLog = 'warning'
+            settings.messageLogToShowUser = 'Notas canceladas nao faz o download separado se a quantidade de dias da data fim for maior que 31 dias da data atual'
+        }
+        settings.pathFile = __filename
+        handlesFetchError(error) // if error is a fetchError
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
-        await treatsMessageLog.saveLog()
+        await treatsMessageLog.saveLog(saveInDB)
     }
 }

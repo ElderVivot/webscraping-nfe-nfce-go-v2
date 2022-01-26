@@ -1,8 +1,8 @@
 import { exec } from 'child_process'
 import util from 'util'
 
+import { makeDateImplementation } from '@common/adapters/date/date-factory'
 import { logger } from '@common/log'
-import { todayLocale } from '@utils/treat-date'
 
 import { ICertifate } from '../i-certificate'
 import { mainGetCertificates } from './get-all-certificates-user-my'
@@ -10,7 +10,8 @@ import { mainGetCertificates } from './get-all-certificates-user-my'
 const execAsync = util.promisify(exec)
 
 const checkIfCertificateIsExpired = (certificate: ICertifate): boolean => {
-    const today = todayLocale()
+    const dateFactory = makeDateImplementation()
+    const today = dateFactory.zonedTimeToUtc(new Date(), 'America/Sao_Paulo')
     if (today > certificate.notAfter) {
         return true
     }

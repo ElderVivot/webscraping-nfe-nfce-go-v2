@@ -32,18 +32,12 @@ export function zeroLeft (valueInsert: string, countZeros: number = 2): string {
     return ('0000'.repeat(countZeros) + valueInsert).slice(-countZeros)
 }
 
-interface IDateInicialEnd {
-    dateInitial: Date,
-    dateFinal: Date
-}
-export function daysInitialAndEndOfMonth (month: number, year: number): IDateInicialEnd {
-    const dateInitial = new Date(year, month - 1, 1)
-    const dateFinal = new Date(year, month, 0)
+export function firstAndLastDayOfMonth (month: number, year: number): {firstDay: Date, lastDay: Date} {
+    const firstDay = new Date(year, month - 1, 1)
+    const lastDay = new Date(year, month, 0)
 
     return {
-        // dateInitial: `${dateInitial.getFullYear()}-${zeroLeft(String(dateInitial.getMonth() + 1))}-${zeroLeft(String(dateInitial.getDate()))}`,
-        // dateFinal: `${dateFinal.getFullYear()}-${zeroLeft(String(dateFinal.getMonth() + 1))}-${zeroLeft(String(dateFinal.getDate()))}`
-        dateInitial, dateFinal
+        firstDay, lastDay
     }
 }
 
@@ -77,5 +71,10 @@ export function minimalizeSpaces (text: string): string {
 
 export function treateTextField (value: string): string {
     const result = value.trim().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z ])/g, '').toUpperCase()
+    return minimalizeSpaces(result)
+}
+
+export function treateTextFieldTwo (value: string): string {
+    const result = value.trim().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z.!+:><=)?$(/*,\-_ \\])/g, '').toUpperCase()
     return minimalizeSpaces(result)
 }

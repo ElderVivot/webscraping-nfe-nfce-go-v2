@@ -18,7 +18,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/pem": "1.9.5",
-    "axios": "0.19.2",
+    "axios": "^0.25.0",
     "bull": "3.16.0",
     "cron": "1.8.2",
     "date-fns": "2.14.0",
