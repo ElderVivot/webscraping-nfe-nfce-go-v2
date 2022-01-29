@@ -36,7 +36,6 @@ export async function CheckIfCompanieIsValid (page: Page, settings: ISettingsNFe
         const response = await fetchFactory.get<ICompanies[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
         const data = response.data
         const companie = await getCompanieActive(data, companiesOnlyActive, settings.year, settings.month)
-        console.log(companie)
 
         settings.codeCompanieAccountSystem = companie ? companie.codeCompanieAccountSystem : ''
         settings.nameCompanie = companie ? companie.name : settings.nameCompanie

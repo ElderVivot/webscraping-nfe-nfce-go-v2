@@ -1,7 +1,6 @@
 import { Page } from 'puppeteer'
 
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
-// import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
+import { ISettingsNFeGoias } from './_interfaces'
 
 export async function ClickOkDownloadFinish (page: Page, settings: ISettingsNFeGoias): Promise<void> {
     try {
@@ -12,10 +11,5 @@ export async function ClickOkDownloadFinish (page: Page, settings: ISettingsNFeG
         settings.messageLog = 'ClickOkDownloadFinish'
         settings.messageError = error
         settings.messageLogToShowUser = 'Erro ao clicar em "OK" após download das notas finalizados'
-        console.log(`\t[Final-Empresa-Mes] - ${settings.messageLogToShowUser}`)
-        console.log('\t-------------------------------------------------')
-
-        // const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
-        // await treatsMessageLog.saveLog()
     }
 }

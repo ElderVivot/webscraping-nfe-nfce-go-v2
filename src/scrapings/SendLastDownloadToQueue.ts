@@ -1,7 +1,8 @@
 import { Page } from 'puppeteer'
 
-import SaveXMLsNFeNFCGO from '../../queues/lib/SaveXMLsNFeNFCGO'
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
+import { saveXMLsNFeNFCGOLib } from '@queues/lib/SaveXMLsNFeNFCGO'
+
+import { ISettingsNFeGoias } from './_interfaces'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 interface IElementDownload {
@@ -31,21 +32,17 @@ export async function SendLastDownloadToQueue (page: Page, settings: ISettingsNF
                 return manager.items_[0]
             }
         })
-        await SaveXMLsNFeNFCGO.add({
+        await saveXMLsNFeNFCGOLib.add({
             pathThatTheFileIsDownloaded: lastDownload.filePath,
             settings
         })
     } catch (error) {
-        // when already processing before then dont save in database again because duplicate registry of scraping, only save is reprocessing
-        const saveInDB = settings.typeLog !== 'processing' || !!settings.id
         settings.typeLog = 'error'
         settings.messageLog = 'SendLastDownloadToQueue'
         settings.messageError = error
-        settings.messageLogToShowUser = 'Erro ao enviar pra fila o último download realizado.'
-        console.log(`\t[Final-Empresa-Mes] - ${settings.messageLogToShowUser}`)
-        console.log('\t-------------------------------------------------')
+        settings.messageLogToShowUser = 'Erro ao enviar pra fila o ultimo download realizado.'
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
-        await treatsMessageLog.saveLog(saveInDB)
+        await treatsMessageLog.saveLog()
     }
 }

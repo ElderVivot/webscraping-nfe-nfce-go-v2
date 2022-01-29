@@ -17,19 +17,15 @@ export async function CreateFolderToSaveXmls (page: Page, settings: ISettingsNFe
             downloadPath: path.resolve(pathNote)
         })
     } catch (error) {
-        // when already processing before then dont save in database again because duplicate registry of scraping, only save is reprocessing
-        const saveInDB = settings.typeLog !== 'processing' || !!settings.idLogNotaFiscal
         settings.typeLog = 'error'
         settings.messageLog = 'CreateFolderToSaveXmls'
         settings.messageError = error
         settings.messageLogToShowUser = 'Erro ao criar pasta pra salvar os xmls.'
         if (error === 'NOT_EXIST_NOTES_TO_DOWN') {
-            settings.messageLogToShowUser = 'Apesar de ter passado pelo captcha e não ter dado aviso de sem notas ele não encontrou nada no download.'
+            settings.messageLogToShowUser = 'Apesar de ter passado pelo captcha e nao ter dado aviso de sem notas ele nao encontrou nada no download.'
         }
-        console.log(`\t[Final-Empresa-Mes] - ${settings.messageLogToShowUser}`)
-        console.log('\t-------------------------------------------------')
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
-        await treatsMessageLog.saveLog(saveInDB)
+        await treatsMessageLog.saveLog()
     }
 }

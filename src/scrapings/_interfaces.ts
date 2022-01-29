@@ -1,5 +1,5 @@
 export type TModelNotaFiscal = '55' | '65' | '57'
-export type TSituationNotaFiscal = '1' | '2' | '3'
+export type TSituationNotaFiscal = '0' | '1' | '2' | '3'
 export type TTypeLogNotaFiscal = 'success' | 'warning' | 'error' | 'processing' | 'to_process'
 export enum ETypeFederalRegistration {cnpj = 'cnpj', cpf = 'cpf', cei = 'cei', caepf = 'caepf', foreign = 'foreign'}
 export enum ECompanieStatus {ACTIVE = 'ACTIVE', INACTIVE = 'INACTIVE'}
@@ -12,8 +12,8 @@ export interface ILogNotaFiscalApi {
     updatedAt?:Date
     modelNotaFiscal: TModelNotaFiscal
     situationNotaFiscal: TSituationNotaFiscal
-    dateStartDown:Date
-    dateEndDown:Date
+    dateStartDown:string
+    dateEndDown:string
     typeLog: TTypeLogNotaFiscal
     messageLog: string
     messageLogToShowUser: string
@@ -28,9 +28,6 @@ export interface ILogNotaFiscalApi {
 
 export interface ISettingsNFeGoias {
     wayCertificate?: string
-    dataCertificate?: Buffer
-    password?: string
-    numeroSerie?: string
     idLogNotaFiscal?: string
     typeLog?: TTypeLogNotaFiscal
     codeCompanieAccountSystem?: string
@@ -55,7 +52,6 @@ export interface ISettingsNFeGoias {
     pageFinal?: number
     qtdPagesTotal?: number
     qtdTimesReprocessed?: number
-    reprocessingFetchErrorsOrProcessing?: boolean,
     pathFile?: string
 }
 

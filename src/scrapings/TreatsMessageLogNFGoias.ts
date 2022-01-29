@@ -40,8 +40,8 @@ export class TreatsMessageLogNFeGoias {
                 federalRegistration: this.settings.federalRegistration,
                 modelNotaFiscal: this.settings.modelNotaFiscal,
                 situationNotaFiscal: this.settings.situationNotaFiscal,
-                dateStartDown: this.settings.dateStartDown,
-                dateEndDown: this.settings.dateEndDown,
+                dateStartDown: this.settings.dateStartDown.toISOString(),
+                dateEndDown: this.settings.dateEndDown.toISOString(),
                 qtdNotesDown: this.settings.qtdNotes || 0,
                 qtdTimesReprocessed: this.settings.qtdTimesReprocessed || 0,
                 pageInicial: this.settings.pageInicial || 0,
@@ -52,20 +52,22 @@ export class TreatsMessageLogNFeGoias {
             const urlBase = `${urlBaseApi}/log_nota_fiscal`
             try {
                 if (this.settings.idLogNotaFiscal) {
-                    await this.fetchFactory.put<ILogNotaFiscalApi[]>(
+                    const response = await this.fetchFactory.put<ILogNotaFiscalApi[]>(
                         `${urlBase}/${this.settings.idLogNotaFiscal}`,
                         { ...dataToSave },
                         { headers: { tenant: process.env.TENANT } }
                     )
+                    if (response.status >= 400) throw response
                 } else {
-                    await this.fetchFactory.post<ILogNotaFiscalApi[]>(
+                    const response = await this.fetchFactory.post<ILogNotaFiscalApi[]>(
                         `${urlBase}`,
                         { ...dataToSave },
                         { headers: { tenant: process.env.TENANT } }
                     )
+                    if (response.status >= 400) throw response
                 }
             } catch (error) {
-                handlesFetchError(error)
+                handlesFetchError(error, this.settings.pathFile)
             }
         }
 

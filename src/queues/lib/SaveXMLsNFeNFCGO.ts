@@ -1,65 +1,88 @@
 import Queue from 'bull'
-import { ISettingsNFeGoias } from 'src/scrapings/nfegoias/ISettingsNFeGoias'
 
-import redisConfig from '../../config/redis'
-import SaveLogNfeNfceGO from '../../controllers/SaveLogNfeNfceGO'
-import SaveXMLsNFeNFCGO from '../jobs/SaveXMLsNFeNFCGO'
+import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
+import { handlesFetchError } from '@common/error/fetchError'
+import { logger } from '@common/log'
+import redisConfig from '@config/redis'
+import { ILogNotaFiscalApi, ISettingsNFeGoias } from '@scrapings/_interfaces'
+import { urlBaseApi } from '@scrapings/_urlBaseApi'
 
-const saveXMLsNFeNFCGO = new Queue(SaveXMLsNFeNFCGO.key, { redis: redisConfig })
+import { SaveXMLsNFeNFCGOJob } from '../jobs/SaveXMLsNFeNFCGO'
 
-saveXMLsNFeNFCGO.on('failed', async (job, error) => {
+const saveXMLsNFeNFCGOLib = new Queue(SaveXMLsNFeNFCGOJob.key, { redis: redisConfig })
+
+saveXMLsNFeNFCGOLib.on('failed', async (job, error) => {
+    const fetchFactory = makeFetchImplementation()
+
     const settings: ISettingsNFeGoias = job.data.settings
-    const saveLogNfeNfceGO = new SaveLogNfeNfceGO()
-    await saveLogNfeNfceGO.saveLog({
-        id: settings.id,
-        hourLog: settings.hourLog,
+    const dataToSave: ILogNotaFiscalApi = {
+        idLogNotaFiscal: settings.idLogNotaFiscal,
+        wayCertificate: settings.wayCertificate,
         typeLog: 'error',
         messageLog: 'ErrorToProcessDataInQueue',
-        messageLogToShowUser: 'Erro ao salvar XMLs na pasta.',
         messageError: error.message,
-        urlImageDown: '',
-        codeCompanie: settings.codeCompanie,
-        nameCompanie: settings.nameCompanie,
-        cgceCompanie: settings.cgceCompanie,
-        modelNF: settings.modelNF,
-        situacaoNF: settings.situacaoNF,
-        dateStartDown: settings.dateStartDown,
-        dateEndDown: settings.dateEndDown,
+        messageLogToShowUser: 'Erro ao salvar XMLs na pasta.',
+        federalRegistration: settings.federalRegistration,
+        modelNotaFiscal: settings.modelNotaFiscal,
+        situationNotaFiscal: settings.situationNotaFiscal,
+        dateStartDown: new Date(settings.dateStartDown).toISOString(),
+        dateEndDown: new Date(settings.dateEndDown).toISOString(),
         qtdNotesDown: settings.qtdNotes,
         qtdTimesReprocessed: settings.qtdTimesReprocessed,
-        qtdPagesTotal: settings.qtdPagesTotal,
         pageInicial: settings.pageInicial,
-        pageFinal: settings.pageFinal
-    })
+        pageFinal: settings.pageFinal,
+        qtdPagesTotal: settings.qtdPagesTotal
+    }
 
-    console.log('Job failed', `ID ${settings.id} | ${settings.codeCompanie} - ${settings.nameCompanie} - ${settings.cgceCompanie} | ${settings.modelNF} | ${settings.situacaoNFDescription} | ${settings.dateStartDown} - ${settings.dateEndDown}`)
+    const urlBase = `${urlBaseApi}/log_nota_fiscal`
+    try {
+        const response = await fetchFactory.put<ILogNotaFiscalApi[]>(
+            `${urlBase}/${dataToSave.idLogNotaFiscal}`,
+            { ...dataToSave },
+            { headers: { tenant: process.env.TENANT } }
+        )
+        if (response.status >= 400) throw response
+    } catch (error) {
+        handlesFetchError(error, __filename)
+    }
+
+    logger.error('Job failed', `ID ${settings.idLogNotaFiscal} | ${settings.codeCompanieAccountSystem} - ${settings.nameCompanie} - ${settings.federalRegistration} | ${settings.modelNotaFiscal} | ${settings.situationNotaFiscal} | ${settings.dateStartDown} - ${settings.dateEndDown}`)
 })
 
-saveXMLsNFeNFCGO.on('completed', async (job) => {
+saveXMLsNFeNFCGOLib.on('completed', async (job) => {
+    const fetchFactory = makeFetchImplementation()
+
     const settings: ISettingsNFeGoias = job.data.settings
-    const saveLogNfeNfceGO = new SaveLogNfeNfceGO()
-    await saveLogNfeNfceGO.saveLog({
-        id: settings.id,
+    const dataToSave: ILogNotaFiscalApi = {
+        idLogNotaFiscal: settings.idLogNotaFiscal,
         wayCertificate: settings.wayCertificate,
-        hourLog: settings.hourLog,
-        typeLog: settings.qtdPagesTotal === settings.pageFinal ? 'success' : 'processing',
+        typeLog: 'success',
         messageLog: 'SucessToSaveNotes',
-        messageLogToShowUser: 'Notas salvas com sucesso',
         messageError: '',
-        urlImageDown: '',
-        codeCompanie: settings.codeCompanie,
-        nameCompanie: settings.nameCompanie,
-        cgceCompanie: settings.cgceCompanie,
-        modelNF: settings.modelNF,
-        situacaoNF: settings.situacaoNF,
-        dateStartDown: settings.dateStartDown,
-        dateEndDown: settings.dateEndDown,
+        messageLogToShowUser: 'Notas salvas com sucesso',
+        federalRegistration: settings.federalRegistration,
+        modelNotaFiscal: settings.modelNotaFiscal,
+        situationNotaFiscal: settings.situationNotaFiscal,
+        dateStartDown: new Date(settings.dateStartDown).toISOString(),
+        dateEndDown: new Date(settings.dateEndDown).toISOString(),
         qtdNotesDown: settings.qtdNotes,
         qtdTimesReprocessed: settings.qtdTimesReprocessed,
-        qtdPagesTotal: settings.qtdPagesTotal,
         pageInicial: settings.pageInicial,
-        pageFinal: settings.pageFinal
-    })
+        pageFinal: settings.pageFinal,
+        qtdPagesTotal: settings.qtdPagesTotal
+    }
+
+    const urlBase = `${urlBaseApi}/log_nota_fiscal`
+    try {
+        const response = await fetchFactory.put<ILogNotaFiscalApi[]>(
+            `${urlBase}/${dataToSave.idLogNotaFiscal}`,
+            { ...dataToSave },
+            { headers: { tenant: process.env.TENANT } }
+        )
+        if (response.status >= 400) throw response
+    } catch (error) {
+        handlesFetchError(error, __filename)
+    }
 })
 
-export default saveXMLsNFeNFCGO
+export { saveXMLsNFeNFCGOLib }

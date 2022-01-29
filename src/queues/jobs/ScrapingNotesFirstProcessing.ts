@@ -1,10 +1,8 @@
-import 'dotenv/config'
-
 import { ISettingsNFeGoias } from '@scrapings/_interfaces'
 import { MainNFGoiasAddQueueToProcess } from '@scrapings/MainNFGoiasAddQueueToProcess'
 import { prepareCertificateRegedit } from '@services/certificates/windows/prepare-certificate-regedit'
 
-export const ScrapingNotesFirstProcessing = {
+export const ScrapingNotesFirstProcessingJob = {
     key: 'ScrapingNotesFirstProcessing',
     async handle ({ data }): Promise<void> {
         const settings: ISettingsNFeGoias = data.settings

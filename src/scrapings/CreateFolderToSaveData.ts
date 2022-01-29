@@ -1,7 +1,7 @@
 
 import fs from 'fs'
 
-import { treateTextField } from '@utils/functions'
+import { treateTextField, zeroLeft } from '@utils/functions'
 
 import { ISettingsNFeGoias } from './_interfaces'
 
@@ -29,13 +29,12 @@ const mountFolder = (settings: ISettingsNFeGoias, folder: string) => {
     const nameCompanie = settings.nameCompanie ? treateTextField(settings.nameCompanie).substring(0, 70) : undefined
     settings.typeNF = typeNF(settings.modelNotaFiscal)
     settings.situacaoNFDescription = getDescriptionSituacaoNF(settings.situationNotaFiscal)
+    const monthString = zeroLeft(settings.month.toString(), 2)
 
     const folderSplit = newFolder.split('/')
     let folderComplete = ''
     for (const field of folderSplit) {
-        if (field === 'numeroSerie') {
-            folderComplete += settings.numeroSerie ? `${settings.numeroSerie}/` : ''
-        } else if (field === 'typeLog') {
+        if (field === 'typeLog') {
             folderComplete += settings.typeLog ? `${settings.typeLog}/` : ''
         } else if (field === 'nameCompanieWithCnpj') {
             folderComplete += settings.nameCompanie && settings.federalRegistration ? `${nameCompanie} - ${settings.federalRegistration}/` : ''
@@ -46,7 +45,7 @@ const mountFolder = (settings: ISettingsNFeGoias, folder: string) => {
         } else if (field === 'year') {
             folderComplete += settings.year ? `${settings.year}/` : ''
         } else if (field === 'month') {
-            folderComplete += settings.month ? `${settings.month}/` : ''
+            folderComplete += settings.month ? `${monthString}/` : ''
         } else if (field === 'EntradasOrSaidas') {
             folderComplete += settings.entradasOrSaidas ? `${settings.entradasOrSaidas}/` : ''
         } else if (field === 'typeNF') {
@@ -58,11 +57,11 @@ const mountFolder = (settings: ISettingsNFeGoias, folder: string) => {
         } else if (field === 'codeCompanieRotinaAutomatica') {
             folderComplete += settings.codeCompanieAccountSystem ? `${settings.codeCompanieAccountSystem}-/` : ''
         } else if (field === 'monthYearRotinaAutomatica') {
-            folderComplete += settings.year && settings.month ? `${settings.month}${settings.year}/` : ''
+            folderComplete += settings.year && settings.month ? `${monthString}${settings.year}/` : ''
         } else if (field === 'monthYear') {
-            folderComplete += settings.year && settings.month ? `${settings.month}-${settings.year}/` : ''
+            folderComplete += settings.year && settings.month ? `${monthString}-${settings.year}/` : ''
         } else if (field === 'yearMonth') {
-            folderComplete += settings.year && settings.month ? `${settings.year}-${settings.month}/` : ''
+            folderComplete += settings.year && settings.month ? `${settings.year}-${monthString}/` : ''
         } else {
             folderComplete += `${field}/`
         }

@@ -1,13 +1,14 @@
 import { CronJob } from 'cron'
 
-import NFeNFCeGO from '../../scrapings/nfegoias/index'
+import { logger } from '@common/log'
+import { Applicattion } from '@scrapings/index'
 
 async function processNotes () {
     try {
-        const applicattion = new NFeNFCeGO()
+        const applicattion = new Applicattion()
         await applicattion.process()
     } catch (error) {
-        console.log(`- Erro ao processar baixa de notas ${error}`)
+        logger.error(`- Erro ao processar baixa de notas ${error}`)
     }
 }
 

@@ -1,8 +1,9 @@
 import { Page } from 'puppeteer'
 
-import { promiseTimeOut } from '../../utils/promise-timeout'
-import { initiateCaptchaRequest, pollForRequestResults } from '../2captcha'
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
+import { promiseTimeOut } from '@utils/promise-timeout'
+
+import { ISettingsNFeGoias } from './_interfaces'
+import { initiateCaptchaRequest, pollForRequestResults } from './2captcha'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 const siteDetails = {
@@ -34,8 +35,6 @@ export async function GoesThroughCaptcha (page: Page, settings: ISettingsNFeGoia
         settings.messageLog = 'GoesThroughCaptcha'
         settings.messageError = error
         settings.messageLogToShowUser = 'Erro ao passar pelo captcha.'
-        console.log(`\t[Final-Empresa-Mes] - ${settings.messageLogToShowUser}`)
-        console.log('\t-------------------------------------------------')
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
         await treatsMessageLog.saveLog()

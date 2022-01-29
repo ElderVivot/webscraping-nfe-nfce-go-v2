@@ -9,7 +9,7 @@
     "nfnfcgo": "node dist/scrapings/nfegoias/index.js",
     "nfnfcgoEP": "node dist/schedules/jobs/NFeNFCeGOReprocessErrorsOrProcessing.js",
     "build": "rimraf dist && tsc",
-    "dev:server": "ts-node src/schedules/server.ts",
+    "dev:server": "ts-node -r tsconfig-paths/register src/schedules/server.ts | pino-pretty -c -t",
     "dev:queue": "ts-node -r tsconfig-paths/register src/queues/queue.ts | pino-pretty -c -t",
     "dev:nfnfcgo": "ts-node -r tsconfig-paths/register src/scrapings/index.ts | pino-pretty -c -t",
     "dev:nfnfcgoEP": "ts-node src/schedules/jobs/NFeNFCeGOReprocessErrorsOrProcessing.ts"

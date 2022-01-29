@@ -1,11 +1,11 @@
 import 'dotenv/config'
-import SaveXMLsNFeNFCGO from './jobs/SaveXMLsNFeNFCGO'
-import { ScrapingNotes } from './jobs/ScrapingNotes'
-import { ScrapingNotesFirstProcessing } from './jobs/ScrapingNotesFirstProcessing'
-import SaveXMLsNFeNFCGOLib from './lib/SaveXMLsNFeNFCGO'
-import { scrapingNotes } from './lib/ScrapingNotes'
-import { scrapingNotesFirstProcessing } from './lib/ScrapingNotesFirstProcessing'
+import { SaveXMLsNFeNFCGOJob } from './jobs/SaveXMLsNFeNFCGO'
+import { ScrapingNotesJob } from './jobs/ScrapingNotes'
+import { ScrapingNotesFirstProcessingJob } from './jobs/ScrapingNotesFirstProcessing'
+import { saveXMLsNFeNFCGOLib } from './lib/SaveXMLsNFeNFCGO'
+import { scrapingNotesLib } from './lib/ScrapingNotes'
+import { scrapingNotesFirstProcessingLib } from './lib/ScrapingNotesFirstProcessing'
 
-// SaveXMLsNFeNFCGOLib.process(SaveXMLsNFeNFCGO.handle)
-// scrapingNotes.process(ScrapingNotes.handle)
-scrapingNotesFirstProcessing.process(ScrapingNotesFirstProcessing.handle)
+saveXMLsNFeNFCGOLib.process(SaveXMLsNFeNFCGOJob.handle)
+scrapingNotesLib.process(ScrapingNotesJob.handle)
+scrapingNotesFirstProcessingLib.process(ScrapingNotesFirstProcessingJob.handle)

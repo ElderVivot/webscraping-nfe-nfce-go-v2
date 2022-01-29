@@ -1,7 +1,8 @@
 import { Page } from 'puppeteer'
 
-import { treateTextField } from '../../utils/functions'
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
+import { treateTextField } from '@utils/functions'
+
+import { ISettingsNFeGoias } from './_interfaces'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 export async function CheckIfSemResultados (page: Page, settings: ISettingsNFeGoias): Promise<void> {
@@ -19,17 +20,13 @@ export async function CheckIfSemResultados (page: Page, settings: ISettingsNFeGo
         if (error === 'NOT_EXIST_NOTES' || error === 'CAPTCHA_INVALID') {
             settings.messageLog = 'CheckIfSemResultados'
             settings.messageError = error
-
             if (error === 'NOT_EXIST_NOTES') {
-                settings.typeLog = 'warning'
+                settings.typeLog = 'success'
                 settings.messageLogToShowUser = 'Não há notas no período informado.'
             } else if (error === 'CAPTCHA_INVALID') {
                 settings.typeLog = 'error'
                 settings.messageLogToShowUser = 'Erro ao passar pelo Captcha.'
             }
-
-            console.log(`\t[Final-Empresa-Mes] - ${settings.messageLogToShowUser}`)
-            console.log('\t-------------------------------------------------')
 
             const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
             await treatsMessageLog.saveLog()

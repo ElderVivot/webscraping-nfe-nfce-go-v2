@@ -9,7 +9,7 @@ import { ILogNotaFiscalApi, ISettingsNFeGoias } from './_interfaces'
 import { urlBaseApi } from './_urlBaseApi'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
-export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISettingsNFeGoias, month: number, year: number, dateFinalOfPeriodToDown: Date): Promise<{initialDate: Date, finalDate: Date}> {
+export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISettingsNFeGoias, month: number, year: number, dateFinalOfPeriodToDown: Date): Promise<ISettingsNFeGoias> {
     try {
         const dateFactory = makeDateImplementation()
         const fetchFactory = makeFetchImplementation()
@@ -23,6 +23,7 @@ export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISett
         if (settings.situationNotaFiscal === '2' && todaySubdays > lastDay) {
             throw 'NOTE_CANCELED_DONT_DOWN_SEPARATELY_IF_MORE_31_DAYS'
         }
+        if (settings.situationNotaFiscal === '1' && todaySubdays > lastDay) settings.situationNotaFiscal = '0'
 
         const getFinalDate = () => {
             const yearFinal = dateFinalOfPeriodToDown.getFullYear()
@@ -34,27 +35,22 @@ export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISett
         const urlBase = `${urlBaseApi}/log_nota_fiscal`
         const urlFilter = `?federalRegistration=${settings.federalRegistration}&modelNotaFiscal=${settings.modelNotaFiscal}&situationNotaFiscal=${settings.situationNotaFiscal}&dateStartDownBetween=${firstDayString}&dateEndDownBetween=${lastDayString}`
         const response = await fetchFactory.get<ILogNotaFiscalApi[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
+        if (response.status >= 400) throw response
         const data = response.data
         if (data.length > 0) {
             const logNotaFiscal = data[data.length - 1]
             const dayDownMax = new Date(logNotaFiscal.dateEndDown).getDate()
 
-            const initialDate = new Date(year, month - 1, dayDownMax + 1)
-            const finalDate = getFinalDate()
-            if (initialDate >= finalDate) {
+            settings.dateStartDown = new Date(year, month - 1, dayDownMax + 1)
+            settings.dateEndDown = getFinalDate()
+            if (settings.dateStartDown >= settings.dateEndDown) {
                 throw 'DONT_HAVE_NEW_PERIOD_TO_PROCESS'
             }
-
-            return {
-                initialDate,
-                finalDate
-            }
         } else {
-            return {
-                initialDate: firstDay,
-                finalDate: getFinalDate()
-            }
+            settings.dateStartDown = firstDay
+            settings.dateEndDown = getFinalDate()
         }
+        return settings
     } catch (error) {
         let saveInDB = true
         settings.typeLog = 'error'
@@ -72,7 +68,7 @@ export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISett
             settings.messageLogToShowUser = 'Notas canceladas nao faz o download separado se a quantidade de dias da data fim for maior que 31 dias da data atual'
         }
         settings.pathFile = __filename
-        handlesFetchError(error) // if error is a fetchError
+        handlesFetchError(error, settings.pathFile) // if error is a fetchError
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
         await treatsMessageLog.saveLog(saveInDB)

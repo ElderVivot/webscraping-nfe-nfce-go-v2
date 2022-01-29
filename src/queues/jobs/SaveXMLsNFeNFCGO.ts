@@ -1,31 +1,30 @@
 import fsExtra from 'fs-extra'
 import path from 'path'
 
-import { createFolderToSaveData } from '../../scrapings/nfegoias/CreateFolderToSaveData'
-import { ISettingsNFeGoias } from '../../scrapings/nfegoias/ISettingsNFeGoias'
+import { logger } from '@common/log'
+import { ISettingsNFeGoias } from '@scrapings/_interfaces'
+import { createFolderToSaveData } from '@scrapings/CreateFolderToSaveData'
 
-const SaveXMLsNFeNFCGO = {
+export const SaveXMLsNFeNFCGOJob = {
     key: 'SaveXMLsNFeNFCGO',
     async handle ({ data }): Promise<void> {
         const settings: ISettingsNFeGoias = data.settings
         const pathThatTheFileIsDownloaded = data.pathThatTheFileIsDownloaded
         let nameFile = path.basename(pathThatTheFileIsDownloaded)
-        if (settings.situacaoNF === '3') {
+        if (settings.situationNotaFiscal === '2') {
             nameFile = nameFile.replace('.zip', '') + '_canc.zip'
         }
 
-        console.log('---------------------------------------------------')
-        console.log(`- [SaveXMLsInFolder] - Salvando xmls na pasta ${settings.codeCompanie || settings.cgceCompanie} - ${settings.nameCompanie} periodo ${settings.dateStartDown} a ${settings.dateEndDown} modelo ${settings.typeNF} e situacao ${settings.situacaoNFDescription}`)
-        console.log('---------------------------------------------------')
+        logger.info('---------------------------------------------------')
+        logger.info(`- [SaveXMLsInFolder] - Salvando xmls na pasta ${settings.codeCompanieAccountSystem || settings.federalRegistration} - ${settings.nameCompanie} periodo ${settings.dateStartDown} a ${settings.dateEndDown} modelo ${settings.modelNotaFiscal} e situacao ${settings.situationNotaFiscal}`)
+        logger.info('---------------------------------------------------')
 
         settings.typeLog = 'success'
         const pathRoutineAutomactic = await createFolderToSaveData(settings, true)
 
-        if (settings.codeCompanie && pathRoutineAutomactic) {
+        if (settings.codeCompanieAccountSystem && pathRoutineAutomactic) {
             await fsExtra.copy(pathThatTheFileIsDownloaded, path.resolve(pathRoutineAutomactic, nameFile))
         }
         return Promise.resolve()
     }
 }
-
-export default SaveXMLsNFeNFCGO

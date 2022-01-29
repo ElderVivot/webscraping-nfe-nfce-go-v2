@@ -1,62 +1,68 @@
 import { CronJob } from 'cron'
-import { format } from 'date-fns-tz'
 
-import GetLogNfeNfceErrorsOrProcessing from '../../controllers/GetLogNfeNfceErrorsOrProcessing'
-import TTypeLog from '../../models/TTypeLog'
-import { scrapingNotes } from '../../queues/lib/ScrapingNotes'
-import { ISettingsNFeGoias } from '../../scrapings/nfegoias/ISettingsNFeGoias'
+import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
+import { handlesFetchError } from '@common/error/fetchError'
+import { logger } from '@common/log'
+import { scrapingNotesLib } from '@queues/lib/ScrapingNotes'
+import { ILogNotaFiscalApi, ISettingsNFeGoias, TTypeLogNotaFiscal } from '@scrapings/_interfaces'
+import { urlBaseApi } from '@scrapings/_urlBaseApi'
 
-async function processNotes (typeLog: TTypeLog) {
-    const getLogNfeNfceErrorsOrProcessing = new GetLogNfeNfceErrorsOrProcessing()
-    const logNfeNfceErrors = await getLogNfeNfceErrorsOrProcessing.get(`?typeLog=${typeLog}`)
-    if (logNfeNfceErrors) {
-        for (const log of logNfeNfceErrors) {
-            const hourLogToCreateFolder = format(new Date(), 'yyyy-MM-dd_hh-mm-ss_a', { timeZone: 'America/Sao_Paulo' })
-            const hourLog = format(new Date(), 'yyyy-MM-dd hh:mm:ss a', { timeZone: 'America/Sao_Paulo' })
+async function processNotes (typeLog: TTypeLogNotaFiscal) {
+    try {
+        const fetchFactory = makeFetchImplementation()
 
-            try {
-                const settings: ISettingsNFeGoias = {
-                    id: log.id,
-                    dateHourProcessing: hourLogToCreateFolder,
-                    hourLog: hourLog,
-                    wayCertificate: log.wayCertificate,
-                    cgceCompanie: log.cgceCompanie,
-                    modelNF: log.modelNF,
-                    situacaoNF: log.situacaoNF,
-                    typeLog,
-                    qtdTimesReprocessed: log.qtdTimesReprocessed,
-                    dateStartDown: log.dateStartDown,
-                    dateEndDown: log.dateEndDown,
-                    pageInicial: log.pageInicial,
-                    pageFinal: log.pageFinal
+        const urlBase = `${urlBaseApi}/log_nota_fiscal`
+        const urlFilter = `?typeLog=${typeLog}`
+        const response = await fetchFactory.get<ILogNotaFiscalApi[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
+        if (response.status >= 400) throw response
+        const data = response.data
+
+        if (data.length > 0) {
+            for (const logNotaFiscal of data) {
+                try {
+                    const settings: ISettingsNFeGoias = {
+                        idLogNotaFiscal: logNotaFiscal.idLogNotaFiscal,
+                        wayCertificate: logNotaFiscal.wayCertificate,
+                        federalRegistration: logNotaFiscal.federalRegistration,
+                        modelNotaFiscal: logNotaFiscal.modelNotaFiscal,
+                        situationNotaFiscal: logNotaFiscal.situationNotaFiscal,
+                        typeLog,
+                        qtdTimesReprocessed: logNotaFiscal.qtdTimesReprocessed,
+                        dateStartDown: new Date(logNotaFiscal.dateStartDown),
+                        dateEndDown: new Date(logNotaFiscal.dateEndDown),
+                        pageInicial: logNotaFiscal.pageInicial,
+                        pageFinal: logNotaFiscal.pageFinal
+                    }
+
+                    const jobId = `${logNotaFiscal.idCompanie}_${logNotaFiscal.federalRegistration}_${logNotaFiscal.modelNotaFiscal}_${logNotaFiscal.situationNotaFiscal}`
+                    const job = await scrapingNotesLib.getJob(jobId)
+                    if (job?.finishedOn) await job.remove() // remove job if already fineshed to process again, if dont fineshed yet, so dont process
+
+                    await scrapingNotesLib.add({
+                        settings
+                    }, {
+                        jobId
+                    })
+
+                    logger.info(`- Reprocessando scraping ${logNotaFiscal.idLogNotaFiscal} referente ao certificado ${logNotaFiscal.wayCertificate} modelo ${logNotaFiscal.modelNotaFiscal} periodo ${logNotaFiscal.dateStartDown} a ${logNotaFiscal.dateEndDown}`)
+                } catch (error) {
+                    logger.error({
+                        msg: `- Erro ao reprocessar scraping ${logNotaFiscal.idLogNotaFiscal} referente ao certificado ${logNotaFiscal.wayCertificate} modelo ${logNotaFiscal.modelNotaFiscal} periodo ${logNotaFiscal.dateStartDown} a ${logNotaFiscal.dateEndDown}`,
+                        locationFile: __filename,
+                        error
+                    })
                 }
-
-                const jobId = `${log.id}_${log.cgceCompanie}_${log.modelNF}_${log.situacaoNF}`
-                const job = await scrapingNotes.getJob(jobId)
-                if (job?.finishedOn) await job.remove()
-
-                await scrapingNotes.add({
-                    settings
-                }, {
-                    jobId
-                })
-
-                console.log(`*- Reprocessando scraping ${settings.id} referente ao certificado ${settings.wayCertificate} modelo periodo ${settings.dateStartDown} a ${settings.dateEndDown} modelo ${settings.modelNF}`)
-            } catch (error) {
-                console.log(`*- Erro ao processar certificado ${log.wayCertificate}. O erro é ${error}`)
             }
         }
+    } catch (error) {
+        handlesFetchError(error, __filename)
     }
 }
 
 export const jobError = new CronJob(
     '30 * * * *',
     async function () {
-        try {
-            await processNotes('error')
-        } catch (error) {
-            console.log(`- Erro ao reprocessar errors: ${error}`)
-        }
+        await processNotes('error')
     },
     null,
     true
@@ -65,24 +71,25 @@ export const jobError = new CronJob(
 export const jobProcessing = new CronJob(
     '15 * * * *',
     async function () {
-        try {
-            await processNotes('processing')
-        } catch (error) {
-            console.log(`- Erro ao reprocessar processing: ${error}`)
-        }
+        await processNotes('processing')
     },
     null,
     true
 )
 
 export const jobToProcess = new CronJob(
-    '50 * * * *',
+    '04 * * * *',
     async function () {
-        try {
-            await processNotes('to_process')
-        } catch (error) {
-            console.log(`- Erro ao reprocessar to_process: ${error}`)
-        }
+        await processNotes('to_process')
+    },
+    null,
+    true
+)
+
+export const jobWarning = new CronJob(
+    '05 12 * * *',
+    async function () {
+        await processNotes('warning')
     },
     null,
     true

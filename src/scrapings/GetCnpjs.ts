@@ -1,8 +1,12 @@
 import { Page, Browser } from 'puppeteer'
 
 import { ISettingsNFeGoias } from './_interfaces'
-import { IOptionsCnpjsGoias } from './IOptionsCnpjsGoias'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
+
+interface IOptionsCnpjsGoias {
+    value: string,
+    label: string
+}
 
 export async function GetCnpjs (page: Page, browser: Browser, settings: ISettingsNFeGoias): Promise<IOptionsCnpjsGoias[]> {
     try {

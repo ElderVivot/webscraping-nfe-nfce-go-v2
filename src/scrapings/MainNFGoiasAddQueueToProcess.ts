@@ -79,13 +79,10 @@ export async function MainNFGoiasAddQueueToProcess (settings: ISettingsNFeGoias 
                                 settings.month = month
                                 const monthSring = functions.zeroLeft(month.toString(), 2)
                                 logger.info(`7- Iniciando processamento do mes ${monthSring}/${year}`)
-                                settings = cleanDataObject(settings, [], ['wayCertificate', 'federalRegistration', 'modelNotaFiscal', 'situationNotaFiscal'])
+                                settings = cleanDataObject(settings, [], ['wayCertificate', 'federalRegistration', 'modelNotaFiscal', 'situationNotaFiscal', 'year', 'month'])
 
                                 try {
-                                    const firstAndLastDayOfMonth = await SetDateInicialAndFinalOfMonth(page, settings, month, year, periodToDown.dateEnd)
-
-                                    settings.dateStartDown = firstAndLastDayOfMonth.initialDate
-                                    settings.dateEndDown = firstAndLastDayOfMonth.finalDate
+                                    settings = await SetDateInicialAndFinalOfMonth(page, settings, month, year, periodToDown.dateEnd)
 
                                     logger.info('8- Checando se e uma empresa valida pra este periodo.')
                                     settings = await CheckIfCompanieIsValid(page, settings)

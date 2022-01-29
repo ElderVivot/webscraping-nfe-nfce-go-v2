@@ -1,7 +1,9 @@
 import { Page } from 'puppeteer'
 
-import { promiseTimeOut } from '../../utils/promise-timeout'
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
+import { logger } from '@common/log'
+import { promiseTimeOut } from '@utils/promise-timeout'
+
+import { ISettingsNFeGoias } from './_interfaces'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 async function downloadInProgress (page: Page): Promise<string> {
@@ -10,7 +12,7 @@ async function downloadInProgress (page: Page): Promise<string> {
 
         const interval = setInterval(async () => {
             quantityTimesCheckIfDownloadInProgress++
-            console.log(`\t\t\t- Processando à ${quantityTimesCheckIfDownloadInProgress * 5} segundos`)
+            logger.info(`- Processando a ${quantityTimesCheckIfDownloadInProgress * 5} segundos`)
             const finishDownloadProgress = await page.evaluate(() => {
                 const modalIsOpen = document.querySelector('.modal-body')
                 const timeInfoLoading = document.querySelector('#timer-info-loading')
@@ -18,7 +20,6 @@ async function downloadInProgress (page: Page): Promise<string> {
                 const operationFinished: string = document.querySelector('.modal-body > .label-info-loading')?.textContent
                 if (operationFinished) {
                     const operationFinishedSanitize = operationFinished.replace(/[^a-zA-Z/ -]/g, '').toUpperCase()
-                    console.log(operationFinishedSanitize)
                     if (operationFinishedSanitize.indexOf('OPERACAO CONCLUIDA')) finishedDownload = true
                 }
                 if (!modalIsOpen) {
@@ -48,22 +49,18 @@ export async function CheckIfDownloadInProgress (page: Page, settings: ISettings
             throw 'MODEL_WITH_BUTTON_DOWN_IS_NOT_OPEN'
         }
     } catch (error) {
-        // when already processing before then dont save in database again because duplicate registry of scraping, only save is reprocessing
-        const saveInDB = settings.typeLog !== 'processing' || !!settings.id
         settings.typeLog = 'error'
         settings.messageLog = 'CheckIfDownloadInProgress'
         settings.messageError = error
-        settings.messageLogToShowUser = 'Erro ao checar se o download das notas ainda está em progresso.'
+        settings.messageLogToShowUser = 'Erro ao checar se o download das notas ainda esta em progresso.'
         if (error === 'MODEL_WITH_BUTTON_DOWN_IS_NOT_OPEN') {
-            settings.messageLogToShowUser = 'Modal de download não está sendo exibido.'
+            settings.messageLogToShowUser = 'Modal de download nao esta sendo exibido.'
         }
         if (error === 'TIME_EXCEED_DOWNLOAD_PROGRESS') {
-            settings.messageLogToShowUser = 'Limete excedido pra checagem se o download ainda está em progresso.'
+            settings.messageLogToShowUser = 'Limite excedido pra checagem se o download ainda esta em progresso.'
         }
-        console.log(`\t[Final-Empresa-Mes] - ${settings.messageLogToShowUser}`)
-        console.log('\t-------------------------------------------------')
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
-        await treatsMessageLog.saveLog(saveInDB)
+        await treatsMessageLog.saveLog()
     }
 }

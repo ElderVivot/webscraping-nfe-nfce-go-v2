@@ -1,13 +1,16 @@
-import { format, zonedTimeToUtc } from 'date-fns-tz'
 import { Page } from 'puppeteer'
 
-import { ISettingsNFeGoias } from './_ISettingsNFeGoias'
+import { makeDateImplementation } from '@common/adapters/date/date-factory'
+
+import { ISettingsNFeGoias } from './_interfaces'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 export async function InputPeriodToDownload (page: Page, settings: ISettingsNFeGoias): Promise<void> {
     try {
-        const dateStartDown = format(new Date(zonedTimeToUtc(settings.dateStartDown, 'America/Sao_Paulo')), 'dd/MM/yyyy', { timeZone: 'America/Sao_Paulo' })
-        const dateEndDown = format(new Date(zonedTimeToUtc(settings.dateEndDown, 'America/Sao_Paulo')), 'dd/MM/yyyy', { timeZone: 'America/Sao_Paulo' })
+        const dateFactory = makeDateImplementation()
+
+        const dateStartDown = dateFactory.formatDate(settings.dateStartDown, 'dd/MM/yyyy')
+        const dateEndDown = dateFactory.formatDate(settings.dateEndDown, 'dd/MM/yyyy')
         await page.waitForSelector('#cmpDataInicial')
         await page.evaluate(`document.getElementById("cmpDataInicial").value="${dateStartDown}";`)
         await page.evaluate(`document.getElementById("cmpDataFinal").value="${dateEndDown}";`)
@@ -16,8 +19,6 @@ export async function InputPeriodToDownload (page: Page, settings: ISettingsNFeG
         settings.messageLog = 'InputPeriodToDownload'
         settings.messageError = error
         settings.messageLogToShowUser = 'Erro ao informar o período pra download das notas.'
-        console.log(`\t[Final-Empresa-Mes] - ${settings.messageLogToShowUser}`)
-        console.log('\t-------------------------------------------------')
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
         await treatsMessageLog.saveLog()
