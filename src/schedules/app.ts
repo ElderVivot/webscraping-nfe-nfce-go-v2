@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { job00, job09, job16 } from './jobs/NFeNFCeGO'
-import { jobError, jobProcessing, jobToProcess, jobWarning } from './jobs/NFeNFCeGOReprocessErrorsOrProcessing'
+import { jobError, jobProcessing, jobToProcess, jobWarning } from './jobs/NFeNFCeGOReprocess'
 
 const app = express()
 
