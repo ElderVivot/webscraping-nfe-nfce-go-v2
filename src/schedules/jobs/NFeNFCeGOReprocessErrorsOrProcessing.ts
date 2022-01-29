@@ -1,5 +1,7 @@
 import { CronJob } from 'cron'
 
+import { IDateAdapter } from '@common/adapters/date/date-adapter'
+import { makeDateImplementation } from '@common/adapters/date/date-factory'
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { handlesFetchError } from '@common/error/fetchError'
 import { logger } from '@common/log'
@@ -7,12 +9,27 @@ import { scrapingNotesLib } from '@queues/lib/ScrapingNotes'
 import { ILogNotaFiscalApi, ISettingsNFeGoias, TTypeLogNotaFiscal } from '@scrapings/_interfaces'
 import { urlBaseApi } from '@scrapings/_urlBaseApi'
 
+function getDateStartAndEnd (dateFactory: IDateAdapter) {
+    const dateStart = dateFactory.subMonths(new Date(), Number(process.env.RETROACTIVE_MONTHS_TO_DOWNLOAD) || 0)
+    dateStart.setDate(1)
+
+    const dateEnd = new Date()
+
+    return {
+        dateStartString: dateFactory.formatDate(dateStart, 'yyyy-MM-dd'),
+        dateEndString: dateFactory.formatDate(dateEnd, 'yyyy-MM-dd')
+    }
+}
+
 async function processNotes (typeLog: TTypeLogNotaFiscal) {
     try {
         const fetchFactory = makeFetchImplementation()
+        const dateFactory = makeDateImplementation()
+
+        const { dateStartString, dateEndString } = getDateStartAndEnd(dateFactory)
 
         const urlBase = `${urlBaseApi}/log_nota_fiscal`
-        const urlFilter = `?typeLog=${typeLog}`
+        const urlFilter = `?typeLog=${typeLog}&dateStartDownBetween=${dateStartString}&dateEndDownBetween=${dateEndString}`
         const response = await fetchFactory.get<ILogNotaFiscalApi[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
         if (response.status >= 400) throw response
         const data = response.data
@@ -20,6 +37,7 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
         if (data.length > 0) {
             for (const logNotaFiscal of data) {
                 try {
+                    if (logNotaFiscal.typeLog === 'warning' && logNotaFiscal.messageError === 'COMPANIE_IS_NOT_STATE_GO') continue
                     const settings: ISettingsNFeGoias = {
                         idLogNotaFiscal: logNotaFiscal.idLogNotaFiscal,
                         wayCertificate: logNotaFiscal.wayCertificate,
@@ -78,7 +96,7 @@ export const jobProcessing = new CronJob(
 )
 
 export const jobToProcess = new CronJob(
-    '04 * * * *',
+    '50 * * * *',
     async function () {
         await processNotes('to_process')
     },
@@ -94,5 +112,3 @@ export const jobWarning = new CronJob(
     null,
     true
 )
-
-// processNotes('error').then(_ => console.log(_))

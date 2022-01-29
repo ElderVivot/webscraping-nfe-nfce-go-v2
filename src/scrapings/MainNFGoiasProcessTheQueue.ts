@@ -11,7 +11,7 @@ import { CheckIfSemResultados } from './CheckIfSemResultados'
 import { ChecksIfFetchInCompetence } from './ChecksIfFetchInCompetence'
 import { ClickDownloadAll } from './ClickDownloadAll'
 import { ClickDownloadModal } from './ClickDownloadModal'
-import { ClickOkDownloadFinish } from './ClickOkDownloadFinish'
+// import { ClickOkDownloadFinish } from './ClickOkDownloadFinish'
 import { CreateFolderToSaveXmls } from './CreateFolderToSaveXmls'
 import { GetQuantityNotes } from './GetQuantityNotes'
 import { GoesThroughCaptcha } from './GoesThroughCaptcha'
@@ -40,16 +40,9 @@ export async function MainNFGoias (settings: ISettingsNFeGoias = {}): Promise<vo
         const urlActual = page.url()
 
         settings.federalRegistration = federalRegistration
-        logger.info(`4- Abrindo CNPJ ${federalRegistration}`)
-
-        settings.modelNotaFiscal = modelNotaFiscal
-        logger.info(`5- Buscando ${settings.modelNotaFiscal}`)
-
-        settings.situationNotaFiscal = situationNotaFiscal
-        logger.info(`6- Buscando notas ${settings.situationNotaFiscal}`)
+        logger.info(`3- Iniciando processamento da empresa ${federalRegistration} - modelo ${modelNotaFiscal} - situacao ${situationNotaFiscal} - ${dateStartDown} a ${dateEndDown}`)
 
         try {
-            logger.info(`7- Iniciando processamento do mes ${dateStartDown} - ${dateEndDown}`)
             settings.dateStartDown = new Date(dateStartDown)
             settings.dateEndDown = new Date(dateEndDown)
             settings.year = settings.dateStartDown.getFullYear()
@@ -58,21 +51,21 @@ export async function MainNFGoias (settings: ISettingsNFeGoias = {}): Promise<vo
 
             await ChecksIfFetchInCompetence(page, settings)
 
-            logger.info('8- Checando se e uma empresa valida pra este periodo.')
+            logger.info('4- Checando se e uma empresa valida pra este periodo.')
             settings = await CheckIfCompanieIsValid(page, settings)
             await page.goto(urlActual)
 
-            logger.info('9- Informando o CNPJ e periodo pra download.')
+            logger.info('5- Informando o CNPJ e periodo pra download.')
             await InputPeriodToDownload(page, settings)
             await ChangeCnpj(page, settings)
 
-            logger.info('10- Informando o modelo')
+            logger.info('6- Informando o modelo')
             await InputModeloToDownload(page, settings)
 
-            logger.info('11- Passando pelo Captcha')
+            logger.info('7- Passando pelo Captcha')
             await GoesThroughCaptcha(page, settings)
 
-            logger.info('12- Verificando se ha notas no filtro passado')
+            logger.info('8- Verificando se ha notas no filtro passado')
             await CheckIfSemResultados(page, settings)
 
             const qtdNotesGlobal = await GetQuantityNotes(page, settings)
@@ -90,20 +83,20 @@ export async function MainNFGoias (settings: ISettingsNFeGoias = {}): Promise<vo
                     settings.pageFinal = pageFinal || settings.pageFinal
                 }
 
-                logger.info(`13- Clicando pra baixar arquivos - pag ${settings.pageInicial} a ${settings.pageFinal} de um total de ${settings.qtdPagesTotal}`)
+                logger.info(`9- Clicando pra baixar arquivos - pag ${settings.pageInicial} a ${settings.pageFinal} de um total de ${settings.qtdPagesTotal}`)
                 await ClickDownloadAll(page, settings)
 
-                logger.info('14- Clicando pra baixar dentro do modal')
+                logger.info('10- Clicando pra baixar dentro do modal')
                 await ClickDownloadModal(page, settings)
 
-                logger.info(`15- Criando pasta pra salvar ${settings.qtdNotes} notas`)
+                logger.info(`11- Criando pasta pra salvar ${settings.qtdNotes} notas`)
                 settings.typeLog = 'success' // update to sucess to create folder
                 await CreateFolderToSaveXmls(page, settings)
 
-                logger.info('16- Checando se o download ainda esta em progresso')
+                logger.info('12- Checando se o download ainda esta em progresso')
                 await CheckIfDownloadInProgress(page, settings)
 
-                logger.info('17- Enviando informacao que o arquivo foi baixado pra fila de salvar o processamento.')
+                logger.info('13- Enviando informacao que o arquivo foi baixado pra fila de salvar o processamento.')
                 const pageDownload = await browser.newPage()
                 await pageDownload.setViewport({ width: 0, height: 0 })
                 await SendLastDownloadToQueue(pageDownload, settings)
@@ -118,13 +111,9 @@ export async function MainNFGoias (settings: ISettingsNFeGoias = {}): Promise<vo
 
                 countWhilePages += 1
             }
-            logger.info('18- Apos processamento concluido, clicando em OK pra finalizar')
-            await ClickOkDownloadFinish(page, settings)
             logger.info('-------------------------------------------------')
-        } catch (error) { logger.info(error) }
+        } catch (error) { if (settings.typeLog === 'error') logger.error(error) }
         logger.info('[Final] - Todos os dados deste navegador foram processados, fechando navegador.')
         if (browser) await browser.close()
-    } catch (error) {
-
-    }
+    } catch (error) { logger.error(error) }
 }
