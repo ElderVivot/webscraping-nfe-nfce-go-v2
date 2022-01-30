@@ -8,7 +8,7 @@
     "queue": "node dist/queues/queue.js",
     "nfnfcgo": "node dist/scrapings/nfegoias/index.js",
     "nfnfcgoEP": "node dist/schedules/jobs/NFeNFCeGOReprocessErrorsOrProcessing.js",
-    "build": "rimraf dist && tsc",
+    "build": "rimraf dist && babel src --extensions \".js,.ts\" --out-dir dist --copy-files --no-copy-ignored",
     "dev:server": "ts-node -r tsconfig-paths/register src/schedules/server.ts | pino-pretty -c -t",
     "dev:queue": "ts-node -r tsconfig-paths/register src/queues/queue.ts | pino-pretty -c -t",
     "dev:nfnfcgo": "ts-node -r tsconfig-paths/register src/scrapings/index.ts | pino-pretty -c -t",
@@ -40,6 +40,11 @@
     "xml2js": "0.4.23"
   },
   "devDependencies": {
+    "@babel/cli": "^7.16.8",
+    "@babel/core": "^7.16.12",
+    "@babel/node": "^7.16.8",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
     "@types/bull": "3.14.0",
     "@types/cron": "1.7.2",
     "@types/dotenv": "8.2.0",
@@ -55,6 +60,7 @@
     "@types/xml2js": "0.4.5",
     "@typescript-eslint/eslint-plugin": "3.5.0",
     "@typescript-eslint/parser": "3.5.0",
+    "babel-plugin-module-resolver": "^4.1.0",
     "eslint": "7.4.0",
     "eslint-config-standard": "14.1.1",
     "eslint-plugin-import": "2.22.0",
