@@ -2,6 +2,7 @@ import { Page } from 'puppeteer'
 
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 
+import { cnaesOfCtesToIssuesNotes } from '../../database-local.json'
 import { ICompanies, ISettingsNFeGoias } from './_interfaces'
 import { urlBaseApi } from './_urlBaseApi'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
@@ -23,6 +24,14 @@ async function getCompanieActive (companies: Array<ICompanies>, onlyActive: bool
         }
         return companies[0]
     } else return companies[0]
+}
+
+function checkIfCteCnaesAllowIssueNotes (cnaes: string): boolean {
+    if (!cnaes) return true
+    for (const cnae of cnaesOfCtesToIssuesNotes) {
+        if (cnaes.indexOf(cnae.toString()) >= 0) return true
+    }
+    return false
 }
 
 export async function CheckIfCompanieIsValid (page: Page, settings: ISettingsNFeGoias): Promise<ISettingsNFeGoias> {
@@ -49,6 +58,9 @@ export async function CheckIfCompanieIsValid (page: Page, settings: ISettingsNFe
         if (companiesOnlyActive && !companie.stateRegistration) {
             throw 'COMPANIE_DONT_HAVE_INSCRICAO_ESTADUAL'
         }
+        if (settings.modelNotaFiscal === '57' && !checkIfCteCnaesAllowIssueNotes(companie.cnaes)) {
+            throw 'COMPANIE_DONT_HAVE_CNAES_ALLOW_TO_ISSUE_CTES'
+        }
         return settings
     } catch (error) {
         settings.typeLog = 'error'
@@ -65,6 +77,9 @@ export async function CheckIfCompanieIsValid (page: Page, settings: ISettingsNFe
         }
         if (error === 'COMPANIE_DONT_HAVE_INSCRICAO_ESTADUAL') {
             settings.messageLogToShowUser = 'Empresa sem inscrição estadual no cadastro.'
+        }
+        if (error === 'COMPANIE_DONT_HAVE_CNAES_ALLOW_TO_ISSUE_CTES') {
+            settings.messageLogToShowUser = 'Empresa sem os CNAEs necessários pra emissão de CT-e: https://www.economia.go.gov.br/receita-estadual/documentos-fiscais/cte.html'
         }
         settings.pathFile = __filename
 
