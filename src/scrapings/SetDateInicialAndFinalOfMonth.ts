@@ -14,7 +14,7 @@ export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISett
         const dateFactory = makeDateImplementation()
         const fetchFactory = makeFetchImplementation()
         const today = new Date()
-        const todaySubdays = dateFactory.subDays(today, 31)
+        const todaySubdays = dateFactory.subDays(today, 32)
 
         const { firstDay, lastDay } = firstAndLastDayOfMonth(month, year)
         const firstDayString = dateFactory.formatDate(firstDay, 'yyyy-MM-dd')
@@ -23,7 +23,6 @@ export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISett
         if (settings.situationNotaFiscal === '2' && todaySubdays > lastDay) {
             throw 'NOTE_CANCELED_DONT_DOWN_SEPARATELY_IF_MORE_31_DAYS'
         }
-        if (settings.situationNotaFiscal === '1' && todaySubdays > lastDay) settings.situationNotaFiscal = '0'
 
         const getFinalDate = () => {
             const yearFinal = dateFinalOfPeriodToDown.getFullYear()
@@ -31,6 +30,8 @@ export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISett
             if (month === monthFinal && year === yearFinal) return dateFinalOfPeriodToDown
             else return lastDay
         }
+        settings.dateStartDown = firstDay
+        settings.dateEndDown = getFinalDate()
 
         const urlBase = `${urlBaseApi}/log_nota_fiscal`
         const urlFilter = `?federalRegistration=${settings.federalRegistration}&modelNotaFiscal=${settings.modelNotaFiscal}&situationNotaFiscal=${settings.situationNotaFiscal}&dateStartDownBetween=${firstDayString}&dateEndDownBetween=${lastDayString}`
@@ -42,13 +43,9 @@ export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISett
             const dayDownMax = new Date(logNotaFiscal.dateEndDown).getDate()
 
             settings.dateStartDown = new Date(year, month - 1, dayDownMax + 1)
-            settings.dateEndDown = getFinalDate()
             if (settings.dateStartDown >= settings.dateEndDown) {
                 throw 'DONT_HAVE_NEW_PERIOD_TO_PROCESS'
             }
-        } else {
-            settings.dateStartDown = firstDay
-            settings.dateEndDown = getFinalDate()
         }
         return settings
     } catch (error) {

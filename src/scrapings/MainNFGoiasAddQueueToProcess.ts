@@ -26,7 +26,18 @@ const modelosNFe = (() => {
     }
 })()
 
-const situacaoNFs: TSituationNotaFiscal[] = ['1', '2']
+const situacaoNFs = (() => {
+    const optionsDefault: TSituationNotaFiscal[] = ['1', '2']
+    if (!process.env.SITUATION_NFs) return optionsDefault
+    else {
+        const arraySituations: TSituationNotaFiscal[] = []
+        const options = process.env.SITUATION_NFs.split(',')
+        for (const option of options) {
+            if (option === '0' || option === '1' || option === '2') arraySituations.push(option)
+        }
+        return arraySituations
+    }
+})()
 
 export async function MainNFGoiasAddQueueToProcess (settings: ISettingsNFeGoias = {}): Promise<void> {
     try {
