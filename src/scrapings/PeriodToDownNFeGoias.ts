@@ -22,7 +22,7 @@ const getDateEnd = (situationNF = '2'): Date => {
         if (dayToday >= 2) {
             return new Date(today.getFullYear(), today.getMonth(), 0)
         } else {
-            throw new Error('DAY_ONE_DONT_DOWN_NOTES_CANCELED')
+            throw 'DAY_ONE_DONT_DOWN_NOTES_CANCELED'
         }
     } else {
         if (dayToday >= 1 && dayToday <= dayFirstSearch) {
