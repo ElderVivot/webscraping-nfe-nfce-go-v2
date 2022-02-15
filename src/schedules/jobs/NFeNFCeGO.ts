@@ -21,7 +21,7 @@ export const job00 = new CronJob(
     true
 )
 
-export const job09 = new CronJob(
+/* export const job09 = new CronJob(
     '03 09 * * *',
     async function () {
         await processNotes()
@@ -31,10 +31,10 @@ export const job09 = new CronJob(
 )
 
 export const job16 = new CronJob(
-    '03 16 * * *',
+    '26 20 * * *',
     async function () {
         await processNotes()
     },
     null,
     true
-)
+) */

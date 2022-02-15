@@ -1,14 +1,14 @@
 import express from 'express'
 
-import { job00, job09, job16 } from './jobs/NFeNFCeGO'
+import { job00 /*, job09, job16 */ } from './jobs/NFeNFCeGO'
 import { jobError, jobProcessing, jobToProcess, jobWarning } from './jobs/NFeNFCeGOReprocess'
 
 const app = express()
 
 async function process () {
     job00.start()
-    job09.start()
-    job16.start()
+    // job09.start()
+    // job16.start()
     jobError.start()
     jobProcessing.start()
     jobToProcess.start()
