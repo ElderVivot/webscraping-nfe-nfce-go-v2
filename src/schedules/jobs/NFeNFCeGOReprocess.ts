@@ -96,7 +96,7 @@ export const jobProcessing = new CronJob(
 )
 
 export const jobToProcess = new CronJob(
-    '41 * * * *',
+    '50 * * * *',
     async function () {
         await processNotes('to_process')
     },
