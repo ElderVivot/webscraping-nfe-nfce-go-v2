@@ -20,7 +20,7 @@ import { InputPeriodToDownload } from './InputPeriodToDownload'
 import { LoguinCertificado } from './LoguinCertificado'
 import { SendLastDownloadToQueue } from './SendLastDownloadToQueue'
 
-export async function MainNFGoias (settings: ISettingsNFeGoias = {}): Promise<void> {
+export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
     try {
         const browser = await puppeteer.launch({
             ignoreHTTPSErrors: true,

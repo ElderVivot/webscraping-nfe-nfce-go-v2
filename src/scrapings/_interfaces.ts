@@ -27,6 +27,7 @@ export interface ILogNotaFiscalApi {
 }
 
 export interface ISettingsNFeGoias {
+    typeProcessing?: 'MainNFGoiasAddQueueToProcess' | 'MainNFGoiasProcessTheQueue',
     wayCertificate?: string
     idLogNotaFiscal?: string
     typeLog?: TTypeLogNotaFiscal

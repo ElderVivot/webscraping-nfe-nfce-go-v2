@@ -39,6 +39,7 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
                 try {
                     if (logNotaFiscal.typeLog === 'warning' && logNotaFiscal.messageError === 'COMPANIE_IS_NOT_STATE_GO') continue
                     const settings: ISettingsNFeGoias = {
+                        typeProcessing: 'MainNFGoiasProcessTheQueue',
                         idLogNotaFiscal: logNotaFiscal.idLogNotaFiscal,
                         wayCertificate: logNotaFiscal.wayCertificate,
                         federalRegistration: logNotaFiscal.federalRegistration,
@@ -52,7 +53,7 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
                         pageFinal: logNotaFiscal.pageFinal
                     }
 
-                    const jobId = `${logNotaFiscal.idCompanie}_${logNotaFiscal.federalRegistration}_${logNotaFiscal.modelNotaFiscal}_${logNotaFiscal.situationNotaFiscal}`
+                    const jobId = `${logNotaFiscal.idCompanie}_${logNotaFiscal.federalRegistration}_${logNotaFiscal.modelNotaFiscal}_${logNotaFiscal.situationNotaFiscal}_${dateFactory.formatDate(settings.dateStartDown, 'yyyyMMdd')}_${dateFactory.formatDate(settings.dateEndDown, 'yyyyMMdd')}`
                     const job = await scrapingNotesLib.getJob(jobId)
                     if (job?.finishedOn) await job.remove() // remove job if already fineshed to process again, if dont fineshed yet, so dont process
 

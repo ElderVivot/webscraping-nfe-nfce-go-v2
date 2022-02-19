@@ -2,7 +2,7 @@ import path from 'path'
 import 'dotenv/config'
 
 import { logger } from '@common/log'
-import { scrapingNotesFirstProcessingLib } from '@queues/lib/ScrapingNotesFirstProcessing'
+import { scrapingNotesLib } from '@queues/lib/ScrapingNotes'
 import { OrganizeCertificates } from '@services/certificates/organize-certificates'
 import { listFiles } from '@utils/get-list-files-of-folder'
 
@@ -17,9 +17,10 @@ class Applicattion {
         for (const fileCertificate of listFilesCertificates) {
             try {
                 const settings: ISettingsNFeGoias = {
+                    typeProcessing: 'MainNFGoiasAddQueueToProcess',
                     wayCertificate: fileCertificate
                 }
-                await scrapingNotesFirstProcessingLib.add({
+                await scrapingNotesLib.add({
                     settings
                 })
                 logger.info({ msg: `- Certificado ${fileCertificate} adicionado na fila` })
