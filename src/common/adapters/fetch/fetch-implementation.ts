@@ -14,4 +14,8 @@ export class FetchImplementation implements IFetchAdapter {
     async put<IData = any> (url: string, data: any, config?: AxiosRequestConfig): Promise<AxiosResponse<IData>> {
         return await axios.put<IData>(url, data, config)
     }
+
+    async patch<IData = any> (url: string, data: any, config?: AxiosRequestConfig): Promise<AxiosResponse<IData>> {
+        return await axios.patch<IData>(url, data, config)
+    }
 }

@@ -1,6 +1,10 @@
 import { Page } from 'puppeteer'
 
-import { ISettingsNFeGoias } from './_interfaces'
+import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
+import { handlesFetchError } from '@common/error/fetchError'
+
+import { ILogNotaFiscalApi, ISettingsNFeGoias } from './_interfaces'
+import { urlBaseApi } from './_urlBaseApi'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 async function getQtdNotes (page: Page): Promise<number> {
@@ -13,9 +17,30 @@ async function getQtdNotes (page: Page): Promise<number> {
     }
 }
 
+async function saveScreenshot (page: Page, settings: ISettingsNFeGoias) {
+    try {
+        const fetchFactory = makeFetchImplementation()
+        const urlBase = `${urlBaseApi}/log_nota_fiscal`
+
+        const screenshot = await page.screenshot({ encoding: 'base64', type: 'png', fullPage: true })
+        await fetchFactory.patch<ILogNotaFiscalApi[]>(
+            `${urlBase}/${settings.idLogNotaFiscal}/upload_print_log`,
+            {
+                bufferImage: screenshot
+            },
+            { headers: { tenant: process.env.TENANT } }
+        )
+    } catch (error) {
+        handlesFetchError(error, __filename)
+    }
+}
+
 export async function GetQuantityNotes (page: Page, settings: ISettingsNFeGoias): Promise<number> {
     try {
         await page.waitForTimeout(3000)
+
+        await saveScreenshot(page, settings)
+
         const qtdNotes = await getQtdNotes(page)
         return qtdNotes
     } catch (error) {
