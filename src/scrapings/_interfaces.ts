@@ -1,6 +1,7 @@
 export type TModelNotaFiscal = '55' | '65' | '57'
 export type TSituationNotaFiscal = '0' | '1' | '2' | '3'
 export type TTypeLogNotaFiscal = 'success' | 'warning' | 'error' | 'processing' | 'to_process'
+export type TTaxRegime = '01' | '02' | '03' | '99'
 export enum ETypeFederalRegistration {cnpj = 'cnpj', cpf = 'cpf', cei = 'cei', caepf = 'caepf', foreign = 'foreign'}
 export enum ECompanieStatus {ACTIVE = 'ACTIVE', INACTIVE = 'INACTIVE'}
 
@@ -24,6 +25,7 @@ export interface ILogNotaFiscalApi {
     pageInicial: number
     pageFinal: number
     qtdPagesTotal: number
+    taxRegime?: TTaxRegime
 }
 
 export interface ISettingsNFeGoias {

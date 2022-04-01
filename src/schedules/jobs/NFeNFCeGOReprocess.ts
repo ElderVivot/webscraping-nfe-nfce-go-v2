@@ -6,7 +6,7 @@ import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { handlesFetchError } from '@common/error/fetchError'
 import { logger } from '@common/log'
 import { scrapingNotesLib } from '@queues/lib/ScrapingNotes'
-import { ILogNotaFiscalApi, ISettingsNFeGoias, TTypeLogNotaFiscal } from '@scrapings/_interfaces'
+import { ILogNotaFiscalApi, ISettingsNFeGoias, TTaxRegime, TTypeLogNotaFiscal } from '@scrapings/_interfaces'
 import { urlBaseApi } from '@scrapings/_urlBaseApi'
 
 function getDateStartAndEnd (dateFactory: IDateAdapter) {
@@ -19,6 +19,13 @@ function getDateStartAndEnd (dateFactory: IDateAdapter) {
         dateStartString: dateFactory.formatDate(dateStart, 'yyyy-MM-dd'),
         dateEndString: dateFactory.formatDate(dateEnd, 'yyyy-MM-dd')
     }
+}
+
+function priorityQueue (taxRegime: TTaxRegime) {
+    if (taxRegime === '01') return 1
+    else if (taxRegime === '02') return 2
+    else if (taxRegime === '03') return 3
+    else return 3
 }
 
 async function processNotes (typeLog: TTypeLogNotaFiscal) {
@@ -60,7 +67,8 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
                     await scrapingNotesLib.add({
                         settings
                     }, {
-                        jobId
+                        jobId,
+                        priority: priorityQueue(logNotaFiscal.taxRegime)
                     })
 
                     logger.info(`- Reprocessando scraping ${logNotaFiscal.idLogNotaFiscal} referente ao certificado ${logNotaFiscal.wayCertificate} modelo ${logNotaFiscal.modelNotaFiscal} periodo ${logNotaFiscal.dateStartDown} a ${logNotaFiscal.dateEndDown}`)
