@@ -56,15 +56,17 @@ export class TreatsMessageLogNFeGoias {
                     )
                     if (response.status >= 400) throw response
 
-                    const screenshot = await this.page.screenshot({ encoding: 'base64', type: 'png', fullPage: true })
+                    if (this.page) {
+                        const screenshot = await this.page.screenshot({ encoding: 'base64', type: 'png', fullPage: true })
 
-                    await this.fetchFactory.patch<ILogNotaFiscalApi[]>(
-                        `${urlBase}/${this.settings.idLogNotaFiscal}/upload_print_log`,
-                        {
-                            bufferImage: screenshot
-                        },
-                        { headers: { tenant: process.env.TENANT } }
-                    )
+                        await this.fetchFactory.patch<ILogNotaFiscalApi[]>(
+                            `${urlBase}/${this.settings.idLogNotaFiscal}/upload_print_log`,
+                            {
+                                bufferImage: screenshot
+                            },
+                            { headers: { tenant: process.env.TENANT } }
+                        )
+                    }
                 } else {
                     const response = await this.fetchFactory.post<ILogNotaFiscalApi[]>(
                         `${urlBase}`,
@@ -92,7 +94,7 @@ export class TreatsMessageLogNFeGoias {
             })
         }
 
-        if (!this.noClosePage) await this.page.close()
+        if (!this.noClosePage && this.page) await this.page.close()
         if (this.browser) await this.browser.close()
 
         throw `[${this.settings.typeLog}]-${this.settings.messageLog}-${this.settings.messageError}`

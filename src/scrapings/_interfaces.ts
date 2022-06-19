@@ -85,5 +85,7 @@ export interface ICompanies {
     taxRegime: '01' | '02' | '03' | '99'
     idCity: number,
     stateCity: string,
-    nameCity: string
+    nameCity: string,
+    urlCert: string,
+    endDateValidityCert: Date
 }

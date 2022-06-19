@@ -1,11 +1,10 @@
 import 'dotenv/config'
-import { Page } from 'puppeteer'
 
 import { IDateAdapter } from '@common/adapters/date/date-adapter'
 import { makeDateImplementation } from '@common/adapters/date/date-factory'
+import { logger } from '@common/log'
 
-import { ISettingsNFeGoias } from './_interfaces'
-import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
+import { TSituationNotaFiscal } from './_interfaces'
 
 const getDateStart = (dateFactory: IDateAdapter): Date => {
     const dateStart = dateFactory.subMonths(new Date(), Number(process.env.RETROACTIVE_MONTHS_TO_DOWNLOAD) || 0)
@@ -33,11 +32,11 @@ const getDateEnd = (situationNF = '2'): Date => {
     }
 }
 
-export async function PeriodToDownNFeGoias (page: Page, settings: ISettingsNFeGoias): Promise<{dateStart: Date, dateEnd: Date}> {
+export async function PeriodToDownNFeGoias (situationNotaFiscal: TSituationNotaFiscal): Promise<{dateStart: Date, dateEnd: Date}> {
     const dateFactory = makeDateImplementation()
     try {
         const dateStart = getDateStart(dateFactory)
-        const dateEnd = getDateEnd(settings.situationNotaFiscal)
+        const dateEnd = getDateEnd(situationNotaFiscal)
 
         if (dateStart >= dateEnd) {
             throw 'DONT_HAVE_NEW_PERIOD_TO_PROCESS'
@@ -47,24 +46,24 @@ export async function PeriodToDownNFeGoias (page: Page, settings: ISettingsNFeGo
             dateStart, dateEnd
         }
     } catch (error) {
-        let saveInDB = true
-        settings.typeLog = 'error'
-        settings.messageLog = 'PeriodToDownNFeGoias'
-        settings.messageError = error
-        settings.messageLogToShowUser = 'Erro ao verificar o periodo pra baixar.'
         if (error === 'DONT_HAVE_NEW_PERIOD_TO_PROCESS') {
-            saveInDB = false
-            settings.typeLog = 'warning'
-            settings.messageLogToShowUser = 'Nao ha um novo periodo pra processar, ou seja, o ultimo processamento ja buscou o periodo maximo.'
+            logger.warn({
+                msg: 'Nao ha um novo periodo pra processar, ou seja, o ultimo processamento ja buscou o periodo maximo.',
+                locationFile: __filename,
+                error
+            })
+        } else if (error === 'DAY_ONE_DONT_DOWN_NOTES_CANCELED') {
+            logger.warn({
+                msg: 'Dia 1 nao faz download de notas canceladas',
+                locationFile: __filename,
+                error
+            })
+        } else {
+            logger.error({
+                msg: 'Erro',
+                locationFile: __filename,
+                error
+            })
         }
-        if (error === 'DAY_ONE_DONT_DOWN_NOTES_CANCELED') {
-            saveInDB = false
-            settings.typeLog = 'warning'
-            settings.messageLogToShowUser = 'Dia 1 nao faz download de notas canceladas'
-        }
-        settings.pathFile = __filename
-
-        const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
-        await treatsMessageLog.saveLog(saveInDB)
     }
 }

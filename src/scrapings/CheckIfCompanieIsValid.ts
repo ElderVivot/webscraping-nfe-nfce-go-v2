@@ -1,5 +1,3 @@
-import { Page } from 'puppeteer'
-
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 
 import { cnaesOfCtesToIssuesNotes } from '../../database-local.json'
@@ -34,24 +32,40 @@ function checkIfCteCnaesAllowIssueNotes (cnaes: string): boolean {
     return false
 }
 
-export async function CheckIfCompanieIsValid (page: Page, settings: ISettingsNFeGoias): Promise<ISettingsNFeGoias> {
+function checkIfCompanieIsActiveInCompetence (settings: ISettingsNFeGoias, companie: ICompanies, onlyActive: boolean) {
+    if (onlyActive) {
+        if (!companie) throw 'COMPANIE_DONT_ACTIVE_THIS_COMPETENCE'
+        const dateCompetence = new Date(settings.year, settings.month, 0)
+        const { dateInicialAsClient, dateFinalAsClient } = companie
+        const dateInicialAsClientToDate = dateInicialAsClient ? new Date(dateInicialAsClient) : null
+        const dateFinalAsClientToDate = dateFinalAsClient ? new Date(dateFinalAsClient) : null
+        if (dateInicialAsClientToDate && dateInicialAsClientToDate > dateCompetence) throw 'COMPANIE_DONT_ACTIVE_THIS_COMPETENCE'
+        if (dateFinalAsClientToDate && dateFinalAsClientToDate < dateCompetence) throw 'COMPANIE_DONT_ACTIVE_THIS_COMPETENCE'
+    }
+}
+
+export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, companieArgument: ICompanies = null): Promise<ISettingsNFeGoias> {
+    let companie: ICompanies
     try {
         const fetchFactory = makeFetchImplementation()
 
         const companiesOnlyActive = process.env.COMPANIES_ONLY_ACTIVE === 'true'
 
-        const urlBase = `${urlBaseApi}/companie`
-        const urlFilter = `?federalRegistration=${settings.federalRegistration}`
-        const response = await fetchFactory.get<ICompanies[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
-        const data = response.data
-        const companie = await getCompanieActive(data, companiesOnlyActive, settings.year, settings.month)
+        if (!companieArgument) {
+            const urlBase = `${urlBaseApi}/companie`
+            const urlFilter = `?federalRegistration=${settings.federalRegistration}`
+            const response = await fetchFactory.get<ICompanies[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
+            const data = response.data
+            companie = await getCompanieActive(data, companiesOnlyActive, settings.year, settings.month)
+        } else {
+            companie = companieArgument
+        }
+
+        checkIfCompanieIsActiveInCompetence(settings, companie, companiesOnlyActive)
 
         settings.codeCompanieAccountSystem = companie ? companie.codeCompanieAccountSystem : ''
         settings.nameCompanie = companie ? companie.name : settings.nameCompanie
 
-        if (companiesOnlyActive && !settings.codeCompanieAccountSystem) {
-            throw 'COMPANIE_NOT_CLIENT_THIS_ACCOUNTING_OFFICE'
-        }
         if (companiesOnlyActive && companie.stateCity !== 'GO') {
             throw 'COMPANIE_IS_NOT_STATE_GO'
         }
@@ -63,15 +77,13 @@ export async function CheckIfCompanieIsValid (page: Page, settings: ISettingsNFe
         }
         return settings
     } catch (error) {
+        let saveInDB = true
         settings.typeLog = 'error'
         settings.messageLog = 'CheckIfCompanieIsActive'
         settings.messageError = error
         settings.messageLogToShowUser = 'Erro ao checar se empresa está ativa como cliente da contabilidade.'
 
         if (String(error).indexOf('COMPANIE') >= 0) settings.typeLog = 'warning'
-        if (error === 'COMPANIE_NOT_CLIENT_THIS_ACCOUNTING_OFFICE') {
-            settings.messageLogToShowUser = 'Empresa não é cliente desta contabilidade neste período.'
-        }
         if (error === 'COMPANIE_IS_NOT_STATE_GO') {
             settings.messageLogToShowUser = 'Empresa não é do estado de GO.'
         }
@@ -81,9 +93,13 @@ export async function CheckIfCompanieIsValid (page: Page, settings: ISettingsNFe
         if (error === 'COMPANIE_DONT_HAVE_CNAES_ALLOW_TO_ISSUE_CTES') {
             settings.messageLogToShowUser = 'Empresa sem os CNAEs necessários pra emissão de CT-e: https://www.economia.go.gov.br/receita-estadual/documentos-fiscais/cte.html'
         }
+        if (error === 'COMPANIE_DONT_ACTIVE_THIS_COMPETENCE') {
+            saveInDB = false
+            settings.messageLogToShowUser = 'Empresa não é cliente desta contabilidade neste período.'
+        }
         settings.pathFile = __filename
 
-        const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
-        await treatsMessageLog.saveLog()
+        const treatsMessageLog = new TreatsMessageLogNFeGoias(null, settings, null, true)
+        await treatsMessageLog.saveLog(saveInDB)
     }
 }

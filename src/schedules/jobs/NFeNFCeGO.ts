@@ -1,19 +1,19 @@
 import { CronJob } from 'cron'
 
 import { logger } from '@common/log'
-import { Applicattion } from '@scrapings/index'
+import { MainNFGoiasAddQueueToProcess } from '@scrapings/MainNFGoiasAddQueueToProcess'
 
 async function processNotes () {
     try {
-        const applicattion = new Applicattion()
-        await applicattion.process()
+        const mainNFGoiasAddQueue = new MainNFGoiasAddQueueToProcess()
+        await mainNFGoiasAddQueue.process()
     } catch (error) {
         logger.error(`- Erro ao processar baixa de notas ${error}`)
     }
 }
 
 export const job00 = new CronJob(
-    '03 00 * * *',
+    '27 23 * * *',
     async function () {
         await processNotes()
     },

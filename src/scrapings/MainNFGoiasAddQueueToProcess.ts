@@ -1,14 +1,13 @@
-import puppeteer from 'puppeteer'
 import 'dotenv/config'
 
+import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { logger } from '@common/log'
+import { urlBaseApi } from '@scrapings/_urlBaseApi'
 import { cleanDataObject } from '@utils/clean-data-object'
 import * as functions from '@utils/functions'
 
-import { ISettingsNFeGoias, TModelNotaFiscal, TSituationNotaFiscal } from './_interfaces'
+import { ICompanies, ISettingsNFeGoias, TModelNotaFiscal, TSituationNotaFiscal } from './_interfaces'
 import { CheckIfCompanieIsValid } from './CheckIfCompanieIsValid'
-import { GetCnpjs } from './GetCnpjs'
-import { LoguinCertificado } from './LoguinCertificado'
 import { PeriodToDownNFeGoias } from './PeriodToDownNFeGoias'
 import { SetDateInicialAndFinalOfMonth } from './SetDateInicialAndFinalOfMonth'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
@@ -39,85 +38,61 @@ const situacaoNFs = (() => {
     }
 })()
 
-export async function MainNFGoiasAddQueueToProcess (settings: ISettingsNFeGoias): Promise<void> {
-    try {
-        const browser = await puppeteer.launch({
-            ignoreHTTPSErrors: true,
-            headless: false,
-            args: ['--start-maximized']
-        })
+export class MainNFGoiasAddQueueToProcess {
+    async process (): Promise<void> {
+        let settings: ISettingsNFeGoias = {}
+        logger.info('- Processando empresas pra adicionar na fila')
+        const fetchFactory = makeFetchImplementation()
 
-        logger.info('1- Abrindo nova pagina')
-        const page = await browser.newPage()
-        await page.setViewport({ width: 0, height: 0 })
+        const urlBase = `${urlBaseApi}/companie`
+        const response = await fetchFactory.get<ICompanies[]>(`${urlBase}`, { headers: { tenant: process.env.TENANT } })
+        if (response.status >= 400) throw response
+        const data = response.data
 
-        logger.info('2- Fazendo loguin com certificado')
-        await LoguinCertificado(page, browser, settings)
+        if (data.length > 0) {
+            for (const companie of data) {
+                settings.federalRegistration = companie.federalRegistration
+                for (const modelo of modelosNFe) {
+                    settings.modelNotaFiscal = modelo
+                    for (const situacao of situacaoNFs) {
+                        settings.situationNotaFiscal = situacao
+                        try {
+                            const periodToDown = await PeriodToDownNFeGoias(situacao)
+                            let year = periodToDown.dateStart.getFullYear()
+                            const yearInicial = year
+                            const yearFinal = periodToDown.dateEnd.getFullYear()
+                            const monthInicial = periodToDown.dateStart.getMonth() + 1
+                            const monthFinal = periodToDown.dateEnd.getMonth() + 1
 
-        logger.info('3- Pegando relacao de CNPS que este certificado tem acesso')
-        const optionsCnpjs = await GetCnpjs(page, browser, settings)
+                            while (year <= yearFinal) {
+                                const months = functions.returnMonthsOfYear(year, monthInicial, yearInicial, monthFinal, yearFinal)
 
-        const urlActual = page.url()
+                                for (const month of months) {
+                                    settings.year = year
+                                    settings.month = month
+                                    // const monthSring = functions.zeroLeft(month.toString(), 2)
+                                    settings = cleanDataObject(settings, [], ['typeProcessing', 'wayCertificate', 'federalRegistration', 'modelNotaFiscal', 'situationNotaFiscal', 'year', 'month'])
 
-        // Percorre o array de empresas
-        for (const option of optionsCnpjs) {
-            settings.federalRegistration = option.value
-            logger.info(`4- Abrindo CNPJ ${option.label}`)
+                                    try {
+                                        settings = await SetDateInicialAndFinalOfMonth(settings, month, year, periodToDown.dateEnd)
 
-            for (const modelo of modelosNFe) {
-                settings.modelNotaFiscal = modelo
+                                        settings = await CheckIfCompanieIsValid(settings, companie)
 
-                logger.info(`5- Buscando notas fiscais modelo ${settings.modelNotaFiscal}`)
-
-                for (const situacao of situacaoNFs) {
-                    settings.situationNotaFiscal = situacao
-
-                    logger.info(`6- Buscando notas com a situacao ${settings.situationNotaFiscal}`)
-
-                    try {
-                        const periodToDown = await PeriodToDownNFeGoias(page, settings)
-                        let year = periodToDown.dateStart.getFullYear()
-                        const yearInicial = year
-                        const yearFinal = periodToDown.dateEnd.getFullYear()
-                        const monthInicial = periodToDown.dateStart.getMonth() + 1
-                        const monthFinal = periodToDown.dateEnd.getMonth() + 1
-
-                        while (year <= yearFinal) {
-                            const months = functions.returnMonthsOfYear(year, monthInicial, yearInicial, monthFinal, yearFinal)
-
-                            for (const month of months) {
-                                settings.year = year
-                                settings.month = month
-                                const monthSring = functions.zeroLeft(month.toString(), 2)
-                                logger.info(`7- Iniciando processamento do mes ${monthSring}/${year}`)
-                                settings = cleanDataObject(settings, [], ['typeProcessing', 'wayCertificate', 'federalRegistration', 'modelNotaFiscal', 'situationNotaFiscal', 'year', 'month'])
-
-                                try {
-                                    settings = await SetDateInicialAndFinalOfMonth(page, settings, month, year, periodToDown.dateEnd)
-
-                                    logger.info('8- Checando se e uma empresa valida pra este periodo.')
-                                    settings = await CheckIfCompanieIsValid(page, settings)
-                                    await page.goto(urlActual)
-
-                                    logger.info('9- Salvando registro pra processamento futuro.')
-                                    settings.typeLog = 'to_process'
-                                    settings.messageLogToShowUser = 'A Processar'
-                                    settings.messageLog = 'QueueToProcess'
-                                    const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
-                                    await treatsMessageLog.saveLog()
-                                } catch (error) {
-                                    logger.info('----------------------------------')
+                                        settings.typeLog = 'to_process'
+                                        settings.messageLogToShowUser = 'A Processar'
+                                        settings.messageLog = 'QueueToProcess'
+                                        settings.wayCertificate = 'empty'
+                                        const treatsMessageLog = new TreatsMessageLogNFeGoias(null, settings, null, true)
+                                        await treatsMessageLog.saveLog()
+                                        logger.info(`- Adicionado na fila empresa ${companie.codeCompanieAccountSystem} - ${companie.name} | ${settings.dateStartDown} a ${settings.dateEndDown}`)
+                                    } catch (error) { logger.info(error) }
                                 }
+                                year++
                             }
-                            year++
-                        }
-                    } catch (error) { logger.error(error) }
+                        } catch (error) { logger.error(error) }
+                    }
                 }
             }
         }
-        logger.info('[Final] - Todos os dados deste navegador foram processados, fechando navegador.')
-        if (browser) await browser.close()
-    } catch (error) {
-        logger.error(error)
     }
 }

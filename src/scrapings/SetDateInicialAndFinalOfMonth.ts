@@ -1,5 +1,3 @@
-import { Page } from 'puppeteer'
-
 import { makeDateImplementation } from '@common/adapters/date/date-factory'
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { handlesFetchError } from '@common/error/fetchError'
@@ -9,7 +7,7 @@ import { ILogNotaFiscalApi, ISettingsNFeGoias } from './_interfaces'
 import { urlBaseApi } from './_urlBaseApi'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
-export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISettingsNFeGoias, month: number, year: number, dateFinalOfPeriodToDown: Date): Promise<ISettingsNFeGoias> {
+export async function SetDateInicialAndFinalOfMonth (settings: ISettingsNFeGoias, month: number, year: number, dateFinalOfPeriodToDown: Date): Promise<ISettingsNFeGoias> {
     try {
         const dateFactory = makeDateImplementation()
         const fetchFactory = makeFetchImplementation()
@@ -67,7 +65,7 @@ export async function SetDateInicialAndFinalOfMonth (page: Page, settings: ISett
         settings.pathFile = __filename
         handlesFetchError(error, settings.pathFile) // if error is a fetchError
 
-        const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
+        const treatsMessageLog = new TreatsMessageLogNFeGoias(null, settings, null, true)
         await treatsMessageLog.saveLog(saveInDB)
     }
 }
