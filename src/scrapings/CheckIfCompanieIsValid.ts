@@ -75,6 +75,12 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
         if (settings.modelNotaFiscal === '57' && !checkIfCteCnaesAllowIssueNotes(companie.cnaes)) {
             throw 'COMPANIE_DONT_HAVE_CNAES_ALLOW_TO_ISSUE_CTES'
         }
+        if (!companie.urlCert) {
+            throw 'COMPANIE_DONT_HAVE_CERTIFICATE'
+        }
+        if (companie.endDateValidityCert && new Date(companie.endDateValidityCert) < new Date()) {
+            throw 'COMPANIE_WITH_CERTIFICATE_OVERDUE'
+        }
         return settings
     } catch (error) {
         let saveInDB = true
@@ -96,6 +102,12 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
         if (error === 'COMPANIE_DONT_ACTIVE_THIS_COMPETENCE') {
             saveInDB = false
             settings.messageLogToShowUser = 'Empresa não é cliente desta contabilidade neste período.'
+        }
+        if (error === 'COMPANIE_DONT_HAVE_CERTIFICATE') {
+            settings.messageLogToShowUser = 'Empresa sem certificado configurado.'
+        }
+        if (error === 'COMPANIE_WITH_CERTIFICATE_OVERDUE') {
+            settings.messageLogToShowUser = 'Empresa com certificado vencido.'
         }
         settings.pathFile = __filename
 

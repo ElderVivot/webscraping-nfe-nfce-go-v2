@@ -13,7 +13,7 @@ async function processNotes () {
 }
 
 export const job00 = new CronJob(
-    '27 23 * * *',
+    '03 00 * * *',
     async function () {
         await processNotes()
     },
