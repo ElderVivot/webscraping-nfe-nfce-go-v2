@@ -50,7 +50,7 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
 
         settings.codeCompanieAccountSystem = companie ? companie.codeCompanieAccountSystem : ''
         settings.nameCompanie = companie ? companie.name : settings.nameCompanie
-        settings.wayCertificate = companie ? companie.urlCert : 'empty'
+        settings.wayCertificate = companie && companie.urlCert ? companie.urlCert : 'empty'
 
         if (companiesOnlyActive && companie.stateCity !== 'GO') {
             throw 'COMPANIE_IS_NOT_STATE_GO'
