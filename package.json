@@ -29,6 +29,7 @@
     "fs-extra": "9.0.1",
     "got": "11.8.0",
     "node-powershell": "4.0.0",
+    "nodejs-file-downloader": "^4.9.3",
     "pem": "1.14.4",
     "pino": "^7.6.3",
     "promise-poller": "1.9.1",

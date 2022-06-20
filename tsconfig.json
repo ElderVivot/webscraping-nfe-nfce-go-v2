@@ -43,6 +43,7 @@
         // "moduleResolution": "node",            /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
         "baseUrl": "./", /* Base directory to resolve non-absolute module names. */
         "paths": {
+            "@types/": ["./src/@types/*"],
             "@common/*": ["./src/common/*"],
             "@config/*": ["./src/config/*"],
             "@queues/*": ["./src/queues/*"],

@@ -97,6 +97,6 @@ export class TreatsMessageLogNFeGoias {
         if (!this.noClosePage && this.page) await this.page.close()
         if (this.browser) await this.browser.close()
 
-        throw `[${this.settings.typeLog}]-${this.settings.messageLog}-${this.settings.messageError}`
+        throw `TreatsMessageLog-[${this.settings.typeLog}]-${this.settings.messageLog}-${this.settings.messageError}`
     }
 }

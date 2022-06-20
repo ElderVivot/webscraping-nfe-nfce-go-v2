@@ -81,11 +81,12 @@ export class MainNFGoiasAddQueueToProcess {
                                         settings.typeLog = 'to_process'
                                         settings.messageLogToShowUser = 'A Processar'
                                         settings.messageLog = 'QueueToProcess'
-                                        settings.wayCertificate = 'empty'
+                                        logger.info(`- Adicionando na fila empresa ${companie.codeCompanieAccountSystem} - ${companie.name} | ${settings.dateStartDown} a ${settings.dateEndDown}`)
                                         const treatsMessageLog = new TreatsMessageLogNFeGoias(null, settings, null, true)
                                         await treatsMessageLog.saveLog()
-                                        logger.info(`- Adicionado na fila empresa ${companie.codeCompanieAccountSystem} - ${companie.name} | ${settings.dateStartDown} a ${settings.dateEndDown}`)
-                                    } catch (error) { logger.info(error) }
+                                    } catch (error) {
+                                        if (error.toString().indexOf('TreatsMessageLog') < 0) logger.error(error)
+                                    }
                                 }
                                 year++
                             }

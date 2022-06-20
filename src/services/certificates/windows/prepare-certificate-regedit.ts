@@ -8,15 +8,15 @@ import { mainGetCertificates } from './get-all-certificates-user-my'
 import { installCertificate } from './install-certificates'
 import { mainSetDefaultCertificateRegedit } from './set-default-certificate-regedit'
 
-export async function prepareCertificateRegedit (fileCertificate: string): Promise<ICertifate> {
+export async function prepareCertificateRegedit (fileCertificate: string, password: string): Promise<ICertifate> {
     try {
-        const nameFile = path.basename(fileCertificate).split('-')[0]
+        const nameFile = path.basename(fileCertificate)
 
         logger.info('- Deletando certificados')
         await mainDeleteCertificates(false)
 
         logger.info(`- Instalando certificado ${nameFile}`)
-        await installCertificate(fileCertificate)
+        await installCertificate(fileCertificate, password)
 
         const certificates = await mainGetCertificates()
         const certificate = certificates[0]

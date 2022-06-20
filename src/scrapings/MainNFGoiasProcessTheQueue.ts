@@ -5,7 +5,7 @@ import { logger } from '@common/log'
 
 import { ISettingsNFeGoias } from './_interfaces'
 import { ChangeCnpj } from './ChangeCnpj'
-import { CheckIfCompanieIsValid } from './CheckIfCompanieIsValid'
+// import { CheckIfCompanieIsValid } from './CheckIfCompanieIsValid'
 import { CheckIfDownloadInProgress } from './CheckIfDownloadInProgress'
 import { CheckIfSemResultados } from './CheckIfSemResultados'
 import { ChecksIfFetchInCompetence } from './ChecksIfFetchInCompetence'
@@ -43,6 +43,7 @@ export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
         logger.info('3- Checando se o CNPJ que esta sendo reprocessado eh o mesmo que esta setado no windows/regedit')
         const optionsCnpjs = await GetCnpjs(page, browser, settings)
         if (optionsCnpjs.filter(cnpj => cnpj.value === federalRegistration).length <= 0) {
+            await browser.close()
             throw `CNPJ ${federalRegistration} not in list of cnpjs the certificate of windows/regedit ${optionsCnpjs}`
         }
 
@@ -58,8 +59,9 @@ export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
 
             await ChecksIfFetchInCompetence(page, settings)
 
-            logger.info('5- Checando se e uma empresa valida pra este periodo.')
-            settings = await CheckIfCompanieIsValid(settings)
+            // logger.info('5- Checando se e uma empresa valida pra este periodo.')
+            // settings = await CheckIfCompanieIsValid(settings)
+
             await page.goto(urlActual)
 
             logger.info('6- Informando o CNPJ e periodo pra download.')

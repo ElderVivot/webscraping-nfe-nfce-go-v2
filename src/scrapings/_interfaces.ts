@@ -26,12 +26,15 @@ export interface ILogNotaFiscalApi {
     pageFinal: number
     qtdPagesTotal: number
     taxRegime?: TTaxRegime
+    codeCompanieAccountSystem?: string
+    nameCompanie?: string
 }
 
 export interface ISettingsNFeGoias {
-    typeProcessing?: 'MainNFGoiasAddQueueToProcess' | 'MainNFGoiasProcessTheQueue',
     wayCertificate?: string
+    passwordCert?: string
     idLogNotaFiscal?: string
+    idCompanie?: string
     typeLog?: TTypeLogNotaFiscal
     codeCompanieAccountSystem?: string
     nameCompanie?: string
@@ -83,9 +86,10 @@ export interface ICompanies {
     dateFinalAsClient: Date
     cnaes: string
     taxRegime: '01' | '02' | '03' | '99'
-    idCity: number,
-    stateCity: string,
-    nameCity: string,
-    urlCert: string,
+    idCity: number
+    stateCity: string
+    nameCity: string
+    urlCert: string
     endDateValidityCert: Date
+    idCertificate: string
 }

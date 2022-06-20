@@ -1,28 +1,10 @@
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
+import { ICertifate } from '@services/certificates/i-certificate'
 
 import { cnaesOfCtesToIssuesNotes } from '../../database-local.json'
 import { ICompanies, ISettingsNFeGoias } from './_interfaces'
 import { urlBaseApi } from './_urlBaseApi'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
-
-async function getCompanieActive (companies: Array<ICompanies>, onlyActive: boolean, year: number, month: number): Promise<ICompanies> {
-    if (onlyActive) {
-        for (const companie of companies) {
-            const { dateInicialAsClient, dateFinalAsClient, federalRegistration } = companie
-            const dateInicialAsClientToDate = dateInicialAsClient ? new Date(dateInicialAsClient) : null
-            const dateFinalAsClientToDate = dateFinalAsClient ? new Date(dateFinalAsClient) : null
-            const cgceSanatized = federalRegistration ? federalRegistration.trim : ''
-            if (cgceSanatized) {
-                if (!dateInicialAsClientToDate || (dateInicialAsClientToDate.getMonth() + 1 >= month && dateInicialAsClientToDate.getFullYear() >= year)) {
-                    if (!dateFinalAsClientToDate || (dateFinalAsClientToDate.getMonth() + 1 <= month && dateFinalAsClientToDate.getFullYear() <= year)) {
-                        return companie
-                    }
-                }
-            }
-        }
-        return companies[0]
-    } else return companies[0]
-}
 
 function checkIfCteCnaesAllowIssueNotes (cnaes: string): boolean {
     if (!cnaes) return true
@@ -52,11 +34,14 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
         const companiesOnlyActive = process.env.COMPANIES_ONLY_ACTIVE === 'true'
 
         if (!companieArgument) {
-            const urlBase = `${urlBaseApi}/companie`
-            const urlFilter = `?federalRegistration=${settings.federalRegistration}`
-            const response = await fetchFactory.get<ICompanies[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
-            const data = response.data
-            companie = await getCompanieActive(data, companiesOnlyActive, settings.year, settings.month)
+            const responseCompanie = await fetchFactory.get<ICompanies>(`${urlBaseApi}/companie/${settings.idCompanie}`, { headers: { tenant: process.env.TENANT } })
+            companie = responseCompanie.data
+
+            if (companie) {
+                const responseCertificate = await fetchFactory.get<ICertifate>(`${urlBaseApi}/certificate/${companie.idCertificate}/show_with_decrypt_password`, { headers: { tenant: process.env.TENANT } })
+                const certificate = responseCertificate.data
+                settings.passwordCert = certificate ? certificate.passwordDecrypt : ''
+            }
         } else {
             companie = companieArgument
         }
@@ -65,6 +50,7 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
 
         settings.codeCompanieAccountSystem = companie ? companie.codeCompanieAccountSystem : ''
         settings.nameCompanie = companie ? companie.name : settings.nameCompanie
+        settings.wayCertificate = companie ? companie.urlCert : 'empty'
 
         if (companiesOnlyActive && companie.stateCity !== 'GO') {
             throw 'COMPANIE_IS_NOT_STATE_GO'

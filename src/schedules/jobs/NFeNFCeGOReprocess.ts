@@ -8,6 +8,7 @@ import { logger } from '@common/log'
 import { scrapingNotesLib } from '@queues/lib/ScrapingNotes'
 import { ILogNotaFiscalApi, ISettingsNFeGoias, TTaxRegime, TTypeLogNotaFiscal } from '@scrapings/_interfaces'
 import { urlBaseApi } from '@scrapings/_urlBaseApi'
+import { CheckIfCompanieIsValid } from '@scrapings/CheckIfCompanieIsValid'
 
 function getDateStartAndEnd (dateFactory: IDateAdapter) {
     const dateStart = dateFactory.subMonths(new Date(), Number(process.env.RETROACTIVE_MONTHS_TO_DOWNLOAD) || 0)
@@ -44,12 +45,13 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
         if (data.length > 0) {
             for (const logNotaFiscal of data) {
                 try {
-                    if (logNotaFiscal.typeLog === 'warning' && logNotaFiscal.messageError === 'COMPANIE_IS_NOT_STATE_GO') continue
-                    const settings: ISettingsNFeGoias = {
-                        typeProcessing: 'MainNFGoiasProcessTheQueue',
+                    let settings: ISettingsNFeGoias = {
                         idLogNotaFiscal: logNotaFiscal.idLogNotaFiscal,
+                        idCompanie: logNotaFiscal.idCompanie,
                         wayCertificate: logNotaFiscal.wayCertificate,
                         federalRegistration: logNotaFiscal.federalRegistration,
+                        codeCompanieAccountSystem: logNotaFiscal.codeCompanieAccountSystem,
+                        nameCompanie: logNotaFiscal.nameCompanie,
                         modelNotaFiscal: logNotaFiscal.modelNotaFiscal,
                         situationNotaFiscal: logNotaFiscal.situationNotaFiscal,
                         typeLog,
@@ -59,6 +61,8 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
                         pageInicial: logNotaFiscal.pageInicial,
                         pageFinal: logNotaFiscal.pageFinal
                     }
+
+                    settings = await CheckIfCompanieIsValid(settings)
 
                     const jobId = `${logNotaFiscal.idCompanie}_${logNotaFiscal.federalRegistration}_${logNotaFiscal.modelNotaFiscal}_${logNotaFiscal.situationNotaFiscal}_${dateFactory.formatDate(settings.dateStartDown, 'yyyyMMdd')}_${dateFactory.formatDate(settings.dateEndDown, 'yyyyMMdd')}`
                     const job = await scrapingNotesLib.getJob(jobId)
@@ -71,13 +75,15 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
                         priority: priorityQueue(logNotaFiscal.taxRegime)
                     })
 
-                    logger.info(`- Reprocessando scraping ${logNotaFiscal.idLogNotaFiscal} referente ao certificado ${logNotaFiscal.wayCertificate} modelo ${logNotaFiscal.modelNotaFiscal} periodo ${logNotaFiscal.dateStartDown} a ${logNotaFiscal.dateEndDown}`)
+                    logger.info(`- Reprocessando scraping ${logNotaFiscal.idLogNotaFiscal} referente a empresa ${logNotaFiscal.codeCompanieAccountSystem} - ${logNotaFiscal.nameCompanie} modelo ${logNotaFiscal.modelNotaFiscal} periodo ${logNotaFiscal.dateStartDown} a ${logNotaFiscal.dateEndDown}`)
                 } catch (error) {
-                    logger.error({
-                        msg: `- Erro ao reprocessar scraping ${logNotaFiscal.idLogNotaFiscal} referente ao certificado ${logNotaFiscal.wayCertificate} modelo ${logNotaFiscal.modelNotaFiscal} periodo ${logNotaFiscal.dateStartDown} a ${logNotaFiscal.dateEndDown}`,
-                        locationFile: __filename,
-                        error
-                    })
+                    if (error.toString().indexOf('TreatsMessageLog') < 0) {
+                        logger.error({
+                            msg: `- Erro ao reprocessar scraping ${logNotaFiscal.idLogNotaFiscal} referente ${logNotaFiscal.codeCompanieAccountSystem} - ${logNotaFiscal.nameCompanie}} modelo ${logNotaFiscal.modelNotaFiscal} periodo ${logNotaFiscal.dateStartDown} a ${logNotaFiscal.dateEndDown}`,
+                            locationFile: __filename,
+                            error
+                        })
+                    }
                 }
             }
         }

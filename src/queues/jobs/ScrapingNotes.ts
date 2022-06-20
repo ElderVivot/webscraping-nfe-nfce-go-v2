@@ -1,3 +1,6 @@
+import path from 'path'
+
+import { makeDownloadImplementation } from '@common/adapters/download/download-factory'
 import { ISettingsNFeGoias } from '@scrapings/_interfaces'
 import { MainNFGoias } from '@scrapings/MainNFGoiasProcessTheQueue'
 import { prepareCertificateRegedit } from '@services/certificates/windows/prepare-certificate-regedit'
@@ -6,22 +9,19 @@ const ScrapingNotesJob = {
     key: 'ScrapingNotes',
     async handle ({ data }): Promise<void> {
         const settings: ISettingsNFeGoias = data.settings
-        const certificate = await prepareCertificateRegedit(settings.wayCertificate)
+
+        const downloadImplementation = makeDownloadImplementation({
+            url: settings.wayCertificate,
+            directory: './certificados/',
+            skipExistingFileName: true
+        })
+        await downloadImplementation.download()
+
+        const nameCertificateSplit = settings.wayCertificate.split('/')
+        await prepareCertificateRegedit(path.resolve('./certificados/', nameCertificateSplit[nameCertificateSplit.length - 1]), settings.passwordCert)
 
         await MainNFGoias({
-            typeProcessing: 'MainNFGoiasProcessTheQueue',
-            wayCertificate: settings.wayCertificate,
-            nameCompanie: certificate.nameCertificate,
-            idLogNotaFiscal: settings.idLogNotaFiscal,
-            federalRegistration: settings.federalRegistration,
-            modelNotaFiscal: settings.modelNotaFiscal,
-            situationNotaFiscal: settings.situationNotaFiscal,
-            typeLog: settings.typeLog,
-            qtdTimesReprocessed: settings.qtdTimesReprocessed,
-            dateStartDown: settings.dateStartDown,
-            dateEndDown: settings.dateEndDown,
-            pageInicial: settings.pageInicial,
-            pageFinal: settings.pageFinal
+            ...settings
         })
 
         // it's necessary to close chromiumm withoud error
