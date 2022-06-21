@@ -37,7 +37,7 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
             const responseCompanie = await fetchFactory.get<ICompanies>(`${urlBaseApi}/companie/${settings.idCompanie}`, { headers: { tenant: process.env.TENANT } })
             companie = responseCompanie.data
 
-            if (companie) {
+            if (companie && companie.idCertificate) {
                 const responseCertificate = await fetchFactory.get<ICertifate>(`${urlBaseApi}/certificate/${companie.idCertificate}/show_with_decrypt_password`, { headers: { tenant: process.env.TENANT } })
                 const certificate = responseCertificate.data
                 settings.passwordCert = certificate ? certificate.passwordDecrypt : ''
