@@ -18,7 +18,7 @@ const ScrapingNotesJob = {
         await downloadImplementation.download()
 
         const nameCertificateSplit = settings.wayCertificate.split('/')
-        await prepareCertificateRegedit(path.resolve('./certificados/', nameCertificateSplit[nameCertificateSplit.length - 1]), settings.passwordCert)
+        await prepareCertificateRegedit(path.resolve('./certificados/', nameCertificateSplit[nameCertificateSplit.length - 1]), settings)
 
         await MainNFGoias({
             ...settings

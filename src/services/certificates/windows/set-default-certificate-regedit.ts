@@ -5,15 +5,17 @@ import path from 'path'
 import util from 'util'
 
 import { logger } from '@common/log'
+import { ISettingsNFeGoias } from '@scrapings/_interfaces'
 
-import { ICertifate } from '../i-certificate'
+// import { ICertifate } from '../i-certificate'
 
 const execAsync = util.promisify(exec)
 
-export async function mainSetDefaultCertificateRegedit (url: string, certificade: ICertifate): Promise<void> {
+export async function mainSetDefaultCertificateRegedit (url: string, settings: ISettingsNFeGoias): Promise<void> {
     const pathSetDefaultCertificateRegedit = path.resolve(__dirname, 'set-default-certificate-regedit.ps1')
+    const commomNameCert = settings.commomNameCert.replace("'", "''").replace(/([\\])/g, '')
     const textCommand = `New-Item -Path HKLM:\\SOFTWARE\\Policies\\Chromium -Name AutoSelectCertificateForUrls -Force
-Set-Itemproperty -Path HKLM:\\SOFTWARE\\Policies\\Chromium\\AutoSelectCertificateForUrls -Name 1 -Value '{"pattern":"${url}","filter":{"SUBJECT":{"CN":"${certificade.requerenteCN.replace("'", "''")}"}}}'
+Set-Itemproperty -Path HKLM:\\SOFTWARE\\Policies\\Chromium\\AutoSelectCertificateForUrls -Name 1 -Value '{"pattern":"${url}","filter":{"SUBJECT":{"CN":"${commomNameCert}"}}}'
 exit`
 
     fs.writeFile(

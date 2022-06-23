@@ -33,6 +33,7 @@ export interface ILogNotaFiscalApi {
 export interface ISettingsNFeGoias {
     wayCertificate?: string
     passwordCert?: string
+    commomNameCert?: string
     idLogNotaFiscal?: string
     idCompanie?: string
     typeLog?: TTypeLogNotaFiscal
@@ -92,4 +93,5 @@ export interface ICompanies {
     urlCert: string
     endDateValidityCert: Date
     idCertificate: string
+    commomNameCert: string
 }

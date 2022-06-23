@@ -51,6 +51,8 @@ export class MainNFGoiasAddQueueToProcess {
 
         if (data.length > 0) {
             for (const companie of data) {
+                if (companie.typeFederalRegistration !== 'cnpj') continue // only cnpj process
+
                 settings.federalRegistration = companie.federalRegistration
                 for (const modelo of modelosNFe) {
                     settings.modelNotaFiscal = modelo
