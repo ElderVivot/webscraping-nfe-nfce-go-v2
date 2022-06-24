@@ -13,9 +13,17 @@ const getDateStart = (dateFactory: IDateAdapter): Date => {
 }
 
 const getDateEnd = (situationNF = '2'): Date => {
-    const dayFirstSearch = Number(process.env.DAY_FIRST_SEARCH) || 15
+    // const dayFirstSearch = Number(process.env.DAY_FIRST_SEARCH) || 15
     const today = new Date()
     const dayToday = today.getDate()
+
+    const daysToDown = process.env.DAYS_TO_DOWN || '15,'
+    const daysToDownSplit = daysToDown.split(',')
+    let dayFirstSearch = Number(daysToDownSplit[0])
+    for (const day of daysToDownSplit) {
+        const dayNumber = Number(day)
+        if (dayNumber < dayToday) dayFirstSearch = dayNumber
+    }
 
     if (situationNF === '2') { // notes canceled
         if (dayToday >= 2) {
