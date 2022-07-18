@@ -22,7 +22,7 @@ const getDateEnd = (situationNF = '2'): Date => {
     let dayFirstSearch = Number(daysToDownSplit[0])
     for (const day of daysToDownSplit) {
         const dayNumber = Number(day)
-        if (dayNumber < dayToday) dayFirstSearch = dayNumber
+        if (dayNumber < dayToday && dayNumber !== 0) dayFirstSearch = dayNumber
     }
 
     if (situationNF === '2') { // notes canceled
