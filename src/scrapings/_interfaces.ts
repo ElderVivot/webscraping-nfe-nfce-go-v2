@@ -94,4 +94,5 @@ export interface ICompanies {
     endDateValidityCert: Date
     idCertificate: string
     commomNameCert: string
+    eCpfCnpjCert: 'eCNPJ' | 'eCPF'
 }
