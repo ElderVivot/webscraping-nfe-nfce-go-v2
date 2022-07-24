@@ -3,6 +3,7 @@ import 'dotenv/config'
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { logger } from '@common/log'
 import { urlBaseApi } from '@scrapings/_urlBaseApi'
+import { saveLogDynamo } from '@services/dynamodb'
 import { cleanDataObject } from '@utils/clean-data-object'
 import * as functions from '@utils/functions'
 
@@ -83,16 +84,35 @@ export class MainNFGoiasAddQueueToProcess {
                                         settings.typeLog = 'to_process'
                                         settings.messageLogToShowUser = 'A Processar'
                                         settings.messageLog = 'QueueToProcess'
-                                        logger.info(`- Adicionando na fila empresa ${companie.codeCompanieAccountSystem} - ${companie.name} | ${settings.dateStartDown} a ${settings.dateEndDown}`)
+
+                                        settings.nameStep = `- Adicionando na fila empresa ${companie.codeCompanieAccountSystem} - ${companie.name} | ${settings.dateStartDown} a ${settings.dateEndDown}`
+
+                                        logger.info(settings.nameStep)
                                         const treatsMessageLog = new TreatsMessageLogNFeGoias(null, settings, null, true)
                                         await treatsMessageLog.saveLog()
                                     } catch (error) {
-                                        if (error.toString().indexOf('TreatsMessageLog') < 0) logger.error(error)
+                                        if (error.toString().indexOf('TreatsMessageLog') < 0) {
+                                            logger.error(error)
+                                            await saveLogDynamo({
+                                                messageError: error,
+                                                messageLog: 'MainNFGoiasAddQueueToProcess',
+                                                pathFile: __filename,
+                                                typeLog: 'error'
+                                            })
+                                        }
                                     }
                                 }
                                 year++
                             }
-                        } catch (error) { logger.error(error) }
+                        } catch (error) {
+                            logger.error(error)
+                            await saveLogDynamo({
+                                messageError: error,
+                                messageLog: 'MainNFGoiasAddQueueToProcess',
+                                pathFile: __filename,
+                                typeLog: 'error'
+                            })
+                        }
                     }
                 }
             }

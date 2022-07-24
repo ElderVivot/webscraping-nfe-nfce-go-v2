@@ -1,12 +1,7 @@
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
-import { logger } from '@common/log'
-
-export function handlesFetchError (error: any, locationFile: string): void {
+export function handlesFetchError (error: any): AxiosResponse | undefined {
     if (axios.isAxiosError(error)) {
-        logger.error({
-            error: error.response?.data,
-            locationFile
-        })
+        return error.response?.data
     }
 }

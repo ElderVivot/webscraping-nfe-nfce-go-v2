@@ -1,8 +1,11 @@
 import 'dotenv/config'
 
+import { settings } from 'cluster'
+
 import { IDateAdapter } from '@common/adapters/date/date-adapter'
 import { makeDateImplementation } from '@common/adapters/date/date-factory'
 import { logger } from '@common/log'
+import { saveLogDynamo } from '@services/dynamodb'
 
 import { TSituationNotaFiscal } from './_interfaces'
 
@@ -58,19 +61,23 @@ export async function PeriodToDownNFeGoias (situationNotaFiscal: TSituationNotaF
             logger.warn({
                 msg: 'Nao ha um novo periodo pra processar, ou seja, o ultimo processamento ja buscou o periodo maximo.',
                 locationFile: __filename,
-                error
+                error,
+                ...settings
             })
         } else if (error === 'DAY_ONE_DONT_DOWN_NOTES_CANCELED') {
             logger.warn({
                 msg: 'Dia 1 nao faz download de notas canceladas',
                 locationFile: __filename,
-                error
+                error,
+                ...settings
             })
         } else {
-            logger.error({
-                msg: 'Erro',
-                locationFile: __filename,
-                error
+            logger.error(error)
+            await saveLogDynamo({
+                messageError: error,
+                messageLog: 'PeriodToDownNFeGoias',
+                pathFile: __filename,
+                typeLog: 'error'
             })
         }
     }

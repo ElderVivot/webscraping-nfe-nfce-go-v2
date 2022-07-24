@@ -4,6 +4,7 @@ import path from 'path'
 import util from 'util'
 
 import { logger } from '@common/log'
+import { saveLogDynamo } from '@services/dynamodb'
 // import { listFiles } from '@utils/get-list-files-of-folder'
 
 const execAsync = util.promisify(exec)
@@ -25,10 +26,12 @@ export async function installCertificate (fileCertificate: string, password: str
         // it's necessary to set certificate regedit, only await in line acima don't suficient
         await new Promise((resolve) => setTimeout(() => resolve(''), 2000))
     } catch (error) {
-        logger.error({
-            msg: '- Error to install-certificate: ',
-            locationFile: __filename,
-            error
+        logger.error(error)
+        await saveLogDynamo({
+            messageError: error,
+            messageLog: 'InstallCertificates',
+            pathFile: __filename,
+            typeLog: 'error'
         })
     }
 }

@@ -63,7 +63,8 @@ export async function SetDateInicialAndFinalOfMonth (settings: ISettingsNFeGoias
             settings.messageLogToShowUser = 'Notas canceladas nao faz o download separado se a quantidade de dias da data fim for maior que 31 dias da data atual'
         }
         settings.pathFile = __filename
-        handlesFetchError(error, settings.pathFile) // if error is a fetchError
+        const responseAxios = handlesFetchError(error)
+        if (responseAxios) settings.errorResponseApi = responseAxios
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(null, settings, null, true)
         await treatsMessageLog.saveLog(saveInDB)

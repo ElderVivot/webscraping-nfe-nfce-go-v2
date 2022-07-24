@@ -4,6 +4,7 @@ import { IFetchAdapter } from '@common/adapters/fetch/fetch-adapter'
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { handlesFetchError } from '@common/error/fetchError'
 import { logger } from '@common/log'
+import { saveLogDynamo } from '@services/dynamodb'
 
 import { ILogNotaFiscalApi, ISettingsNFeGoias } from './_interfaces'
 import { urlBaseApi } from './_urlBaseApi'
@@ -76,23 +77,18 @@ export class TreatsMessageLogNFeGoias {
                     if (response.status >= 400) throw response
                 }
             } catch (error) {
-                handlesFetchError(error, this.settings.pathFile)
+                const responseAxios = handlesFetchError(error)
+                if (responseAxios) this.settings.errorResponseApi = responseAxios
             }
         }
 
-        if (this.settings.typeLog === 'warning') {
-            logger.warn({
-                msg: this.settings.messageLogToShowUser,
-                locationFile: this.settings.pathFile,
-                error: this.settings.error
-            })
-        } else if (this.settings.typeLog === 'error') {
+        if (this.settings.typeLog === 'error') {
             logger.error({
-                msg: this.settings.messageLogToShowUser,
-                locationFile: this.settings.pathFile,
-                error: this.settings.error
+                ...this.settings
             })
         }
+
+        await saveLogDynamo(this.settings)
 
         if (!this.noClosePage && this.page) await this.page.close()
         if (this.browser) await this.browser.close()

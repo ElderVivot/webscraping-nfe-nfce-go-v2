@@ -4,6 +4,7 @@ import util from 'util'
 import { IDateAdapter } from '@common/adapters/date/date-adapter'
 import { makeDateImplementation } from '@common/adapters/date/date-factory'
 import { logger } from '@common/log'
+import { saveLogDynamo } from '@services/dynamodb'
 import { treateTextFieldTwo as treatText } from '@utils/functions'
 
 import { ICertifate } from '../i-certificate'
@@ -74,10 +75,12 @@ export async function mainGetCertificates (): Promise<ICertifate[]> {
         getDataCertificate(dateFactory, stdoutSplit)
     }
     if (stderr) {
-        logger.error({
-            msg: '- Erro ao ler certificados instalados em Usuario/Pessoal: ',
-            locationFile: __filename,
-            error: stderr
+        logger.error(stderr)
+        await saveLogDynamo({
+            messageError: stderr,
+            messageLog: 'GetAllCertificatesUserMy',
+            pathFile: __filename,
+            typeLog: 'error'
         })
     }
     return certificates

@@ -43,7 +43,8 @@ export async function ChecksIfFetchInCompetence (page: Page, settings: ISettings
             settings.typeLog = 'warning'
             settings.messageLogToShowUser = 'Periodo que apresentou erro na consulta ja foi realizada com sucesso'
         }
-        handlesFetchError(error, __filename)
+        const responseAxios = handlesFetchError(error)
+        if (responseAxios) settings.errorResponseApi = responseAxios
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
         await treatsMessageLog.saveLog(saveInDB)

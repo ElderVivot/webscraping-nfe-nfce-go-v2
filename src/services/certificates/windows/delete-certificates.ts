@@ -3,6 +3,7 @@ import util from 'util'
 
 import { makeDateImplementation } from '@common/adapters/date/date-factory'
 import { logger } from '@common/log'
+import { saveLogDynamo } from '@services/dynamodb'
 
 import { ICertifate } from '../i-certificate'
 import { mainGetCertificates } from './get-all-certificates-user-my'
@@ -22,18 +23,30 @@ export async function mainDeleteCertificates (deleteOnlyExpired = true): Promise
     const certificates = await mainGetCertificates()
 
     for (const certificate of certificates) {
-        if (checkIfCertificateIsExpired(certificate) || !deleteOnlyExpired) {
-            const { stdout, stderr } = await execAsync(`certutil -delstore -user My ${certificate.numeroSerie}`)
-            if (stdout) {
-                logger.info(`- Certificado ${certificate.requerenteCN} deletado com sucesso`)
+        try {
+            if (checkIfCertificateIsExpired(certificate) || !deleteOnlyExpired) {
+                const { stdout, stderr } = await execAsync(`certutil -delstore -user My ${certificate.numeroSerie}`)
+                if (stdout) {
+                    logger.info(`- Certificado ${certificate.requerenteCN} deletado com sucesso`)
+                }
+                if (stderr) {
+                    logger.error(stderr)
+                    await saveLogDynamo({
+                        messageError: stderr,
+                        messageLog: 'DeleteCertificates',
+                        pathFile: __filename,
+                        typeLog: 'error'
+                    })
+                }
             }
-            if (stderr) {
-                logger.error({
-                    msg: '- Erro ao deletar certificado: ',
-                    locationFile: __filename,
-                    error: stderr
-                })
-            }
+        } catch (error) {
+            logger.error(error)
+            await saveLogDynamo({
+                messageError: error,
+                messageLog: 'DeleteCertificates',
+                pathFile: __filename,
+                typeLog: 'error'
+            })
         }
     }
 }

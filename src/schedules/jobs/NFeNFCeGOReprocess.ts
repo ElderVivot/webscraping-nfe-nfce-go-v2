@@ -1,3 +1,4 @@
+import { settings } from 'cluster'
 import { CronJob } from 'cron'
 
 import { IDateAdapter } from '@common/adapters/date/date-adapter'
@@ -9,6 +10,7 @@ import { scrapingNotesLib } from '@queues/lib/ScrapingNotes'
 import { ILogNotaFiscalApi, ISettingsNFeGoias, TTaxRegime, TTypeLogNotaFiscal } from '@scrapings/_interfaces'
 import { urlBaseApi } from '@scrapings/_urlBaseApi'
 import { CheckIfCompanieIsValid } from '@scrapings/CheckIfCompanieIsValid'
+import { saveLogDynamo } from '@services/dynamodb'
 
 function getDateStartAndEnd (dateFactory: IDateAdapter) {
     const dateStart = dateFactory.subMonths(new Date(), Number(process.env.RETROACTIVE_MONTHS_TO_DOWNLOAD) || 0)
@@ -78,22 +80,31 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
                     logger.info(`- Reprocessando scraping ${logNotaFiscal.idLogNotaFiscal} referente a empresa ${logNotaFiscal.codeCompanieAccountSystem} - ${logNotaFiscal.nameCompanie} modelo ${logNotaFiscal.modelNotaFiscal} periodo ${logNotaFiscal.dateStartDown} a ${logNotaFiscal.dateEndDown}`)
                 } catch (error) {
                     if (error.toString().indexOf('TreatsMessageLog') < 0) {
-                        logger.error({
-                            msg: `- Erro ao reprocessar scraping ${logNotaFiscal.idLogNotaFiscal} referente ${logNotaFiscal.codeCompanieAccountSystem} - ${logNotaFiscal.nameCompanie}} modelo ${logNotaFiscal.modelNotaFiscal} periodo ${logNotaFiscal.dateStartDown} a ${logNotaFiscal.dateEndDown}`,
-                            locationFile: __filename,
-                            error
+                        await saveLogDynamo({
+                            ...settings,
+                            messageError: error,
+                            messageLog: 'NFeNFCeGOReprocess',
+                            pathFile: __filename,
+                            typeLog: 'error'
                         })
                     }
                 }
             }
         }
     } catch (error) {
-        handlesFetchError(error, __filename)
+        const responseFetch = handlesFetchError(error)
+        await saveLogDynamo({
+            messageError: error,
+            messageLog: 'NFeNFCeGOReprocess',
+            pathFile: __filename,
+            typeLog: 'error',
+            errorResponseApi: responseFetch
+        })
     }
 }
 
 export const jobError = new CronJob(
-    '30 * * * *',
+    '12 * * * *',
     async function () {
         await processNotes('error')
     },
@@ -111,7 +122,7 @@ export const jobProcessing = new CronJob(
 )
 
 export const jobToProcess = new CronJob(
-    '50 * * * *',
+    '45 * * * *',
     async function () {
         await processNotes('to_process')
     },

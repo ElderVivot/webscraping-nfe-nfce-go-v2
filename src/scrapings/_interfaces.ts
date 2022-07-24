@@ -60,6 +60,8 @@ export interface ISettingsNFeGoias {
     qtdPagesTotal?: number
     qtdTimesReprocessed?: number
     pathFile?: string
+    nameStep?: string
+    errorResponseApi?: any
 }
 
 export interface ICompanies {
