@@ -3,13 +3,13 @@ import { v4 as uuid } from 'uuid'
 
 import { logger } from '@common/log'
 import { AwsConfig } from '@config/dynamodb'
-import { ILogNotaFiscalApi, ISettingsNFeGoias } from '@scrapings/_interfaces'
+import { ISettingsNFeGoias } from '@scrapings/_interfaces'
 
 const tableName = 'log-webscraping-notes-go'
 AWS.config.update(AwsConfig)
 const dynamoDb = new AWS.DynamoDB.DocumentClient()
 
-export async function saveLogDynamo (dataToSave: ISettingsNFeGoias | ILogNotaFiscalApi): Promise<void> {
+export async function saveLogDynamo (dataToSave: ISettingsNFeGoias): Promise<void> {
     var params = {
         TableName: tableName,
         Item: {

@@ -44,7 +44,14 @@ saveXMLsNFeNFCGOLib.on('failed', async (job, error) => {
         )
         if (response.status >= 400) throw response
 
-        await saveLogDynamo(dataToSave)
+        await saveLogDynamo({
+            ...settings,
+            typeLog: 'error',
+            messageLog: 'SaveXMLsNFeNFCGO',
+            pathFile: __filename,
+            messageError: error.message,
+            messageLogToShowUser: 'Erro ao salvar XMLs na pasta.'
+        })
     } catch (error) {
         const responseFetch = handlesFetchError(error)
         await saveLogDynamo({
@@ -91,7 +98,14 @@ saveXMLsNFeNFCGOLib.on('completed', async (job) => {
         )
         if (response.status >= 400) throw response
 
-        await saveLogDynamo(dataToSave)
+        await saveLogDynamo({
+            ...settings,
+            typeLog: 'success',
+            messageLog: 'SaveXMLsNFeNFCGO',
+            pathFile: __filename,
+            messageError: '',
+            messageLogToShowUser: 'Notas salvas com sucesso'
+        })
     } catch (error) {
         const responseFetch = handlesFetchError(error)
         await saveLogDynamo({
