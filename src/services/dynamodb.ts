@@ -10,20 +10,20 @@ AWS.config.update(AwsConfig)
 const dynamoDb = new AWS.DynamoDB.DocumentClient()
 
 export async function saveLogDynamo (dataToSave: ISettingsNFeGoias): Promise<void> {
-    var params = {
-        TableName: tableName,
-        Item: {
-            ...dataToSave,
-            id: uuid(),
-            tenant: process.env.TENANT,
-            timeLog: new Date().toISOString(),
-            timeLogNumber: new Date().getTime(),
-            dateStartDown: new Date(dataToSave.dateStartDown).toISOString(),
-            dateEndDown: new Date(dataToSave.dateEndDown).toISOString()
-        }
-    }
-
     try {
+        var params = {
+            TableName: tableName,
+            Item: {
+                ...dataToSave,
+                id: uuid(),
+                tenant: process.env.TENANT,
+                timeLog: new Date().toISOString(),
+                timeLogNumber: new Date().getTime(),
+                dateStartDown: dataToSave.dateStartDown ? new Date(dataToSave.dateStartDown).toISOString() : null,
+                dateEndDown: dataToSave.dateEndDown ? new Date(dataToSave.dateEndDown).toISOString() : null
+            }
+        }
+
         await dynamoDb.put(params).promise()
     } catch (err) {
         logger.error({ error: err })

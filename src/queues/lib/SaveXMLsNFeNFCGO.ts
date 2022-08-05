@@ -16,27 +16,28 @@ saveXMLsNFeNFCGOLib.on('failed', async (job, error) => {
     const fetchFactory = makeFetchImplementation()
 
     const settings: ISettingsNFeGoias = job.data.settings
-    const dataToSave: ILogNotaFiscalApi = {
-        idLogNotaFiscal: settings.idLogNotaFiscal,
-        wayCertificate: settings.wayCertificate,
-        typeLog: 'error',
-        messageLog: 'ErrorToProcessDataInQueue',
-        messageError: error.message,
-        messageLogToShowUser: 'Erro ao salvar XMLs na pasta.',
-        federalRegistration: settings.federalRegistration,
-        modelNotaFiscal: settings.modelNotaFiscal,
-        situationNotaFiscal: settings.situationNotaFiscal,
-        dateStartDown: new Date(settings.dateStartDown).toISOString(),
-        dateEndDown: new Date(settings.dateEndDown).toISOString(),
-        qtdNotesDown: settings.qtdNotes,
-        qtdTimesReprocessed: settings.qtdTimesReprocessed,
-        pageInicial: settings.pageInicial,
-        pageFinal: settings.pageFinal,
-        qtdPagesTotal: settings.qtdPagesTotal
-    }
-
-    const urlBase = `${urlBaseApi}/log_nota_fiscal`
     try {
+        const dataToSave: ILogNotaFiscalApi = {
+            idLogNotaFiscal: settings.idLogNotaFiscal,
+            wayCertificate: settings.wayCertificate,
+            typeLog: 'error',
+            messageLog: 'ErrorToProcessDataInQueue',
+            messageError: error.message,
+            messageLogToShowUser: 'Erro ao salvar XMLs na pasta.',
+            federalRegistration: settings.federalRegistration,
+            modelNotaFiscal: settings.modelNotaFiscal,
+            situationNotaFiscal: settings.situationNotaFiscal,
+            dateStartDown: new Date(settings.dateStartDown).toISOString(),
+            dateEndDown: new Date(settings.dateEndDown).toISOString(),
+            qtdNotesDown: settings.qtdNotes,
+            qtdTimesReprocessed: settings.qtdTimesReprocessed,
+            pageInicial: settings.pageInicial,
+            pageFinal: settings.pageFinal,
+            qtdPagesTotal: settings.qtdPagesTotal
+        }
+
+        const urlBase = `${urlBaseApi}/log_nota_fiscal`
+
         const response = await fetchFactory.put<ILogNotaFiscalApi[]>(
             `${urlBase}/${dataToSave.idLogNotaFiscal}`,
             { ...dataToSave },
@@ -70,27 +71,27 @@ saveXMLsNFeNFCGOLib.on('completed', async (job) => {
     const fetchFactory = makeFetchImplementation()
 
     const settings: ISettingsNFeGoias = job.data.settings
-    const dataToSave: ILogNotaFiscalApi = {
-        idLogNotaFiscal: settings.idLogNotaFiscal,
-        wayCertificate: settings.wayCertificate,
-        typeLog: 'success',
-        messageLog: 'SucessToSaveNotes',
-        messageError: '',
-        messageLogToShowUser: 'Notas salvas com sucesso',
-        federalRegistration: settings.federalRegistration,
-        modelNotaFiscal: settings.modelNotaFiscal,
-        situationNotaFiscal: settings.situationNotaFiscal,
-        dateStartDown: new Date(settings.dateStartDown).toISOString(),
-        dateEndDown: new Date(settings.dateEndDown).toISOString(),
-        qtdNotesDown: settings.qtdNotes,
-        qtdTimesReprocessed: settings.qtdTimesReprocessed,
-        pageInicial: settings.pageInicial,
-        pageFinal: settings.pageFinal,
-        qtdPagesTotal: settings.qtdPagesTotal
-    }
-
-    const urlBase = `${urlBaseApi}/log_nota_fiscal`
     try {
+        const dataToSave: ILogNotaFiscalApi = {
+            idLogNotaFiscal: settings.idLogNotaFiscal,
+            wayCertificate: settings.wayCertificate,
+            typeLog: 'success',
+            messageLog: 'SucessToSaveNotes',
+            messageError: '',
+            messageLogToShowUser: 'Notas salvas com sucesso',
+            federalRegistration: settings.federalRegistration,
+            modelNotaFiscal: settings.modelNotaFiscal,
+            situationNotaFiscal: settings.situationNotaFiscal,
+            dateStartDown: new Date(settings.dateStartDown).toISOString(),
+            dateEndDown: new Date(settings.dateEndDown).toISOString(),
+            qtdNotesDown: settings.qtdNotes,
+            qtdTimesReprocessed: settings.qtdTimesReprocessed,
+            pageInicial: settings.pageInicial,
+            pageFinal: settings.pageFinal,
+            qtdPagesTotal: settings.qtdPagesTotal
+        }
+
+        const urlBase = `${urlBaseApi}/log_nota_fiscal`
         const response = await fetchFactory.put<ILogNotaFiscalApi[]>(
             `${urlBase}/${dataToSave.idLogNotaFiscal}`,
             { ...dataToSave },
