@@ -11,6 +11,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient()
 
 export async function saveLogDynamo (dataToSave: ISettingsNFeGoias): Promise<void> {
     try {
+        /*
         var params = {
             TableName: tableName,
             Item: {
@@ -25,6 +26,7 @@ export async function saveLogDynamo (dataToSave: ISettingsNFeGoias): Promise<voi
         }
 
         await dynamoDb.put(params).promise()
+        */
     } catch (err) {
         logger.error({ error: err })
     }

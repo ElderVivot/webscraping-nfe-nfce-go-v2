@@ -1,5 +1,6 @@
 import fsExtra from 'fs-extra'
 import path from 'path'
+import extractZip from 'extract-zip'
 
 import { logger } from '@common/log'
 import { ISettingsNFeGoias } from '@scrapings/_interfaces'
@@ -24,7 +25,9 @@ export const SaveXMLsNFeNFCGOJob = {
             const pathRoutineAutomactic = await createFolderToSaveData(settings, true)
 
             if (settings.codeCompanieAccountSystem && pathRoutineAutomactic) {
-                await fsExtra.copy(pathThatTheFileIsDownloaded, path.resolve(pathRoutineAutomactic, nameFile))
+                const pathZip = path.resolve(pathRoutineAutomactic, nameFile)
+                await fsExtra.copy(pathThatTheFileIsDownloaded, pathZip)
+                await extractZip(pathZip, {dir: pathRoutineAutomactic})
             }
             return Promise.resolve()
         } catch (error) {
