@@ -38,7 +38,6 @@
     "pem": "1.14.4",
     "pino": "^7.6.3",
     "promise-poller": "1.9.1",
-    "ps-list": "^8.1.0",
     "puppeteer": "5.4.1",
     "request": "2.88.2",
     "request-promise": "4.2.6",

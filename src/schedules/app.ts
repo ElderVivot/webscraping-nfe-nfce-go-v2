@@ -1,23 +1,20 @@
+import { exec } from 'child_process'
 import express from 'express'
-import findProcess from 'find-process'
-import { kill } from 'process'
+import util from 'util'
 
 import { job00 /*, job09, job16 */ } from './jobs/NFeNFCeGO'
 import { jobError, jobProcessing, jobToProcess, jobWarning } from './jobs/NFeNFCeGOReprocess'
+
+const execAsync = util.promisify(exec)
 
 const app = express()
 
 async function closeNodeExe () {
     try {
-        const processes = await findProcess('name', 'node', true)
-        for (const proc of processes) {
-            try {
-                if (proc.cmd.indexOf('webscraping-nfe-nfce-go-v2') >= 0) {
-                    kill(proc.ppid)
-                }
-            } catch (error) { }
-        }
-    } catch (error) { }
+        await execAsync(`python ${__dirname}\\CloseOtherProcess.py`)
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 closeNodeExe().then(_ => console.log())
