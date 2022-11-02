@@ -46,6 +46,11 @@ export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
             throw `CNPJ ${federalRegistration} not in list of cnpjs the certificate of windows/regedit ${optionsCnpjs}`
         }
 
+        if (federalRegistration.length < 14) {
+            await browser.close()
+            throw `Dont CNPJ, is a CPF ${federalRegistration}`
+        }
+
         settings.federalRegistration = federalRegistration
         settings.nameStep = `4- Iniciando processamento da empresa ${federalRegistration} - modelo ${modelNotaFiscal} - situacao ${situationNotaFiscal} - ${dateStartDown} a ${dateEndDown}`
 

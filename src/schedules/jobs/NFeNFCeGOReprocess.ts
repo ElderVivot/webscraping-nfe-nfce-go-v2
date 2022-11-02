@@ -64,6 +64,10 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
                         pageFinal: logNotaFiscal.pageFinal
                     }
 
+                    if (settings.federalRegistration.length < 14) {
+                        throw `TreatsMessageLog - Dont CNPJ, is a CPF ${settings.federalRegistration}`
+                    }
+
                     settings = await CheckIfCompanieIsValid(settings)
 
                     const jobId = `${logNotaFiscal.idCompanie}_${logNotaFiscal.federalRegistration}_${logNotaFiscal.modelNotaFiscal}_${logNotaFiscal.situationNotaFiscal}_${dateFactory.formatDate(settings.dateStartDown, 'yyyyMMdd')}_${dateFactory.formatDate(settings.dateEndDown, 'yyyyMMdd')}`

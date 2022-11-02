@@ -27,7 +27,9 @@ export const SaveXMLsNFeNFCGOJob = {
             if (settings.codeCompanieAccountSystem && pathRoutineAutomactic) {
                 const pathZip = path.resolve(pathRoutineAutomactic, nameFile)
                 await fsExtra.copy(pathThatTheFileIsDownloaded, pathZip)
-                await extractZip(pathZip, {dir: pathRoutineAutomactic})
+                if(settings.situationNotaFiscal === '2') {
+                    await extractZip(pathZip, {dir: pathRoutineAutomactic})
+                }
             }
             return Promise.resolve()
         } catch (error) {
