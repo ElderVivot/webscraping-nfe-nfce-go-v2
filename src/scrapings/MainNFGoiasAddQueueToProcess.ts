@@ -52,7 +52,7 @@ export class MainNFGoiasAddQueueToProcess {
 
         if (data.length > 0) {
             for (const companie of data) {
-                if (companie.eCpfCnpjCert !== 'eCNPJ') continue // only cnpj process
+                if (companie.eCpfCnpjCert !== 'eCNPJ' || companie.federalRegistration.length < 14) continue // only cnpj process
 
                 settings.federalRegistration = companie.federalRegistration
                 for (const modelo of modelosNFe) {
