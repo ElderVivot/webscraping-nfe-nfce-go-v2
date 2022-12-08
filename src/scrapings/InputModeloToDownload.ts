@@ -16,7 +16,7 @@ export async function InputModeloToDownload (page: Page, settings: ISettingsNFeG
         await page.waitForSelector('#cmpModelo')
         await page.select('#cmpModelo', settings.modelNotaFiscal)
 
-        if (settings.situationNotaFiscal !== '0') {
+        if (settings.situationNotaFiscal !== '0' && settings.situationNotaFiscal !== '1') {
             await page.waitForSelector('#cmpSituacao')
             await page.select('#cmpSituacao', getSituationNF(settings.situationNotaFiscal))
         }
