@@ -45,11 +45,10 @@ export class MainNFGoiasAddQueueToProcess {
         logger.info('- Processando empresas pra adicionar na fila')
         const fetchFactory = makeFetchImplementation()
 
-        const urlBase = `${urlBaseApi}/companie`
+        const urlBase = `${urlBaseApi}/companie?status=ACTIVE`
         const response = await fetchFactory.get<ICompanies[]>(`${urlBase}`, { headers: { tenant: process.env.TENANT } })
         if (response.status >= 400) throw response
         const data = response.data
-
         if (data.length > 0) {
             for (const companie of data) {
                 if (companie.eCpfCnpjCert !== 'eCNPJ' || companie.federalRegistration.length < 14) continue // only cnpj process
