@@ -1,6 +1,6 @@
+import extractZip from 'extract-zip'
 import fsExtra from 'fs-extra'
 import path from 'path'
-import extractZip from 'extract-zip'
 
 import { logger } from '@common/log'
 import { ISettingsNFeGoias } from '@scrapings/_interfaces'
@@ -8,7 +8,7 @@ import { createFolderToSaveData } from '@scrapings/CreateFolderToSaveData'
 
 export const SaveXMLsNFeNFCGOJob = {
     key: 'SaveXMLsNFeNFCGO',
-    async handle ({ data }): Promise<void> {
+    async handle ({ data }: {data: {settings: ISettingsNFeGoias, pathThatTheFileIsDownloaded: string}}): Promise<void> {
         try {
             const settings: ISettingsNFeGoias = data.settings
             const pathThatTheFileIsDownloaded = data.pathThatTheFileIsDownloaded
@@ -27,8 +27,8 @@ export const SaveXMLsNFeNFCGOJob = {
             if (settings.codeCompanieAccountSystem && pathRoutineAutomactic) {
                 const pathZip = path.resolve(pathRoutineAutomactic, nameFile)
                 await fsExtra.copy(pathThatTheFileIsDownloaded, pathZip)
-                if(settings.situationNotaFiscal === '2') {
-                    await extractZip(pathZip, {dir: pathRoutineAutomactic})
+                if (settings.situationNotaFiscal === '2') {
+                    await extractZip(pathZip, { dir: pathRoutineAutomactic })
                 }
             }
             return Promise.resolve()

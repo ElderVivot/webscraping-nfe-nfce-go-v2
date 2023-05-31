@@ -2,7 +2,6 @@ import puppeteer from 'puppeteer'
 import 'dotenv/config'
 
 import { logger } from '@common/log'
-import { saveLogDynamo } from '@services/dynamodb'
 
 import { ISettingsNFeGoias } from './_interfaces'
 import { ChangeCnpj } from './ChangeCnpj'
@@ -125,23 +124,11 @@ export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
         } catch (error) {
             if (error.toString().indexOf('TreatsMessageLog') < 0) {
                 logger.error(error)
-                await saveLogDynamo({
-                    messageError: error,
-                    messageLog: 'MainNFGoiasProcessTheQueue',
-                    pathFile: __filename,
-                    typeLog: 'error'
-                })
             }
         }
         logger.info('[Final] - Todos os dados deste navegador foram processados, fechando navegador.')
         if (browser) await browser.close()
     } catch (error) {
         logger.error(error)
-        await saveLogDynamo({
-            messageError: error,
-            messageLog: 'MainNFGoiasProccessTheQueue',
-            pathFile: __filename,
-            typeLog: 'error'
-        })
     }
 }

@@ -5,7 +5,6 @@ import { settings } from 'cluster'
 import { IDateAdapter } from '@common/adapters/date/date-adapter'
 import { makeDateImplementation } from '@common/adapters/date/date-factory'
 import { logger } from '@common/log'
-import { saveLogDynamo } from '@services/dynamodb'
 
 import { TSituationNotaFiscal } from './_interfaces'
 
@@ -73,12 +72,6 @@ export async function PeriodToDownNFeGoias (situationNotaFiscal: TSituationNotaF
             })
         } else {
             logger.error(error)
-            await saveLogDynamo({
-                messageError: error,
-                messageLog: 'PeriodToDownNFeGoias',
-                pathFile: __filename,
-                typeLog: 'error'
-            })
         }
     }
 }

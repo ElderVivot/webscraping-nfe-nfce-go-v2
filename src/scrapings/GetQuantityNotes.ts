@@ -2,7 +2,7 @@ import { Page } from 'puppeteer'
 
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { handlesFetchError } from '@common/error/fetchError'
-import { saveLogDynamo } from '@services/dynamodb'
+import { logger } from '@common/log'
 
 import { ILogNotaFiscalApi, ISettingsNFeGoias } from './_interfaces'
 import { urlBaseApi } from './_urlBaseApi'
@@ -33,14 +33,8 @@ async function saveScreenshot (page: Page, settings: ISettingsNFeGoias) {
         )
     } catch (error) {
         const responseAxios = handlesFetchError(error)
-        if (responseAxios) settings.errorResponseApi = responseAxios
-        await saveLogDynamo({
-            ...settings,
-            messageLog: 'ErrorToSaveScreenshot',
-            messageError: error,
-            typeLog: 'error',
-            pathFile: __filename
-        })
+        if (responseAxios) logger.error(responseAxios)
+        else logger.error(error)
     }
 }
 

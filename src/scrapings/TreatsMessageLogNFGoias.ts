@@ -4,7 +4,6 @@ import { IFetchAdapter } from '@common/adapters/fetch/fetch-adapter'
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { handlesFetchError } from '@common/error/fetchError'
 import { logger } from '@common/log'
-import { saveLogDynamo } from '@services/dynamodb'
 
 import { ILogNotaFiscalApi, ISettingsNFeGoias } from './_interfaces'
 import { urlBaseApi } from './_urlBaseApi'
@@ -87,8 +86,6 @@ export class TreatsMessageLogNFeGoias {
                 ...this.settings
             })
         }
-
-        await saveLogDynamo(this.settings)
 
         if (!this.noClosePage && this.page) await this.page.close()
         if (this.browser) await this.browser.close()

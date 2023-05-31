@@ -3,7 +3,6 @@ import 'dotenv/config'
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { logger } from '@common/log'
 import { urlBaseApi } from '@scrapings/_urlBaseApi'
-import { saveLogDynamo } from '@services/dynamodb'
 import { cleanDataObject } from '@utils/clean-data-object'
 import * as functions from '@utils/functions'
 
@@ -92,12 +91,6 @@ export class MainNFGoiasAddQueueToProcess {
                                     } catch (error) {
                                         if (error.toString().indexOf('TreatsMessageLog') < 0) {
                                             logger.error(error)
-                                            await saveLogDynamo({
-                                                messageError: error,
-                                                messageLog: 'MainNFGoiasAddQueueToProcess',
-                                                pathFile: __filename,
-                                                typeLog: 'error'
-                                            })
                                         }
                                     }
                                 }
@@ -105,12 +98,6 @@ export class MainNFGoiasAddQueueToProcess {
                             }
                         } catch (error) {
                             logger.error(error)
-                            await saveLogDynamo({
-                                messageError: error,
-                                messageLog: 'MainNFGoiasAddQueueToProcess',
-                                pathFile: __filename,
-                                typeLog: 'error'
-                            })
                         }
                     }
                 }

@@ -6,7 +6,6 @@ import { logger } from '@common/log'
 import redisConfig from '@config/redis'
 import { ILogNotaFiscalApi, ISettingsNFeGoias } from '@scrapings/_interfaces'
 import { urlBaseApi } from '@scrapings/_urlBaseApi'
-import { saveLogDynamo } from '@services/dynamodb'
 
 import { SaveXMLsNFeNFCGOJob } from '../jobs/SaveXMLsNFeNFCGO'
 
@@ -44,24 +43,10 @@ saveXMLsNFeNFCGOLib.on('failed', async (job, error) => {
             { headers: { tenant: process.env.TENANT } }
         )
         if (response.status >= 400) throw response
-
-        await saveLogDynamo({
-            ...settings,
-            typeLog: 'error',
-            messageLog: 'SaveXMLsNFeNFCGO',
-            pathFile: __filename,
-            messageError: error.message,
-            messageLogToShowUser: 'Erro ao salvar XMLs na pasta.'
-        })
     } catch (error) {
         const responseFetch = handlesFetchError(error)
-        await saveLogDynamo({
-            messageError: error,
-            messageLog: 'SaveXMLsNFeNFCGO',
-            pathFile: __filename,
-            typeLog: 'error',
-            errorResponseApi: responseFetch
-        })
+        if (responseFetch) logger.error(responseFetch)
+        else logger.error(error)
     }
 
     logger.error('Job failed', `ID ${settings.idLogNotaFiscal} | ${settings.codeCompanieAccountSystem} - ${settings.nameCompanie} - ${settings.federalRegistration} | ${settings.modelNotaFiscal} | ${settings.situationNotaFiscal} | ${settings.dateStartDown} - ${settings.dateEndDown}`)
@@ -98,24 +83,10 @@ saveXMLsNFeNFCGOLib.on('completed', async (job) => {
             { headers: { tenant: process.env.TENANT } }
         )
         if (response.status >= 400) throw response
-
-        await saveLogDynamo({
-            ...settings,
-            typeLog: 'success',
-            messageLog: 'SaveXMLsNFeNFCGO',
-            pathFile: __filename,
-            messageError: '',
-            messageLogToShowUser: 'Notas salvas com sucesso'
-        })
     } catch (error) {
         const responseFetch = handlesFetchError(error)
-        await saveLogDynamo({
-            messageError: error,
-            messageLog: 'SaveXMLsNFeNFCGO',
-            pathFile: __filename,
-            typeLog: 'error',
-            errorResponseApi: responseFetch
-        })
+        if (responseFetch) logger.error(responseFetch)
+        else logger.error(error)
     }
 })
 
