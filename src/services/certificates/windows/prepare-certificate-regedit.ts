@@ -2,7 +2,6 @@ import path from 'path'
 
 import { logger } from '@common/log'
 import { ISettingsNFeGoias } from '@scrapings/_interfaces'
-import { saveLogDynamo } from '@services/dynamodb'
 
 import { mainDeleteCertificates } from './delete-certificates'
 import { installCertificate } from './install-certificates'
@@ -22,11 +21,5 @@ export async function prepareCertificateRegedit (fileCertificate: string, settin
         await mainSetDefaultCertificateRegedit('https://nfe.sefaz.go.gov.br', settings)
     } catch (error) {
         logger.error(error)
-        await saveLogDynamo({
-            messageError: error,
-            messageLog: 'PrepareCertificateRegedit',
-            pathFile: __filename,
-            typeLog: 'error'
-        })
     }
 }

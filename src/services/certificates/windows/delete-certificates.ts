@@ -3,7 +3,6 @@ import util from 'util'
 
 import { makeDateImplementation } from '@common/adapters/date/date-factory'
 import { logger } from '@common/log'
-import { saveLogDynamo } from '@services/dynamodb'
 
 import { ICertifate } from '../i-certificate'
 import { mainGetCertificates } from './get-all-certificates-user-my'
@@ -31,22 +30,10 @@ export async function mainDeleteCertificates (deleteOnlyExpired = true): Promise
                 }
                 if (stderr) {
                     logger.error(stderr)
-                    await saveLogDynamo({
-                        messageError: stderr,
-                        messageLog: 'DeleteCertificates',
-                        pathFile: __filename,
-                        typeLog: 'error'
-                    })
                 }
             }
         } catch (error) {
             logger.error(error)
-            await saveLogDynamo({
-                messageError: error,
-                messageLog: 'DeleteCertificates',
-                pathFile: __filename,
-                typeLog: 'error'
-            })
         }
     }
 }

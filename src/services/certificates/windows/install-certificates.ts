@@ -4,7 +4,6 @@ import path from 'path'
 import util from 'util'
 
 import { logger } from '@common/log'
-import { saveLogDynamo } from '@services/dynamodb'
 // import { listFiles } from '@utils/get-list-files-of-folder'
 
 const execAsync = util.promisify(exec)
@@ -27,12 +26,6 @@ export async function installCertificate (fileCertificate: string, password: str
         await new Promise((resolve) => setTimeout(() => resolve(''), 2000))
     } catch (error) {
         logger.error(error)
-        await saveLogDynamo({
-            messageError: error,
-            messageLog: 'InstallCertificates',
-            pathFile: __filename,
-            typeLog: 'error'
-        })
     }
 }
 
