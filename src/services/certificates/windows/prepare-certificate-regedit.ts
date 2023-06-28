@@ -18,7 +18,7 @@ export async function prepareCertificateRegedit (fileCertificate: string, settin
         await installCertificate(fileCertificate, settings.passwordCert)
 
         logger.info(`- Lendo certificado ${settings.commomNameCert}`)
-        await mainSetDefaultCertificateRegedit('https://nfe.sefaz.go.gov.br', settings)
+        await mainSetDefaultCertificateRegedit('https://nfeweb.sefaz.go.gov.br', settings)
     } catch (error) {
         logger.error(error)
     }
