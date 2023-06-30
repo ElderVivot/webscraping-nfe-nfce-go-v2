@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer'
+import { chromium } from 'playwright'
 import 'dotenv/config'
 
 import { logger } from '@common/log'
@@ -10,28 +10,22 @@ import { CheckIfSemResultados } from './CheckIfSemResultados'
 import { ChecksIfFetchInCompetence } from './ChecksIfFetchInCompetence'
 import { ClickDownloadAll } from './ClickDownloadAll'
 import { ClickDownloadModal } from './ClickDownloadModal'
-import { CreateFolderToSaveXmls } from './CreateFolderToSaveXmls'
 import { GetCnpjs } from './GetCnpjs'
 import { GetQuantityNotes } from './GetQuantityNotes'
 import { GoesThroughCaptcha } from './GoesThroughCaptcha'
 import { InputModeloToDownload } from './InputModeloToDownload'
 import { InputPeriodToDownload } from './InputPeriodToDownload'
 import { LoguinCertificado } from './LoguinCertificado'
-import { SendLastDownloadToQueue } from './SendLastDownloadToQueue'
 
 export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
     try {
-        const browser = await puppeteer.launch({
-            ignoreHTTPSErrors: true,
-            headless: false,
-            args: ['--start-maximized']
-        })
+        const browser = await chromium.launch({ headless: false, slowMo: 300, timeout: 120000 })
+        const context = await browser.newContext({ ignoreHTTPSErrors: true })
 
         const { dateStartDown, dateEndDown, modelNotaFiscal, situationNotaFiscal, federalRegistration, pageInicial, pageFinal } = settings
 
         logger.info('1- Abrindo nova pagina')
-        const page = await browser.newPage()
-        await page.setViewport({ width: 0, height: 0 })
+        const page = await context.newPage()
 
         logger.info('2- Fazendo loguin com certificado')
         await LoguinCertificado(page, browser, settings)
@@ -96,20 +90,11 @@ export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
                 await ClickDownloadAll(page, settings)
 
                 logger.info('11- Clicando pra baixar dentro do modal')
-                await ClickDownloadModal(page, settings)
-
-                logger.info(`12- Criando pasta pra salvar ${settings.qtdNotes} notas`)
                 settings.typeLog = 'success' // update to sucess to create folder
-                await CreateFolderToSaveXmls(page, settings)
+                await ClickDownloadModal(page, settings)
 
                 logger.info('13- Checando se o download ainda esta em progresso')
                 await CheckIfDownloadInProgress(page, settings)
-
-                logger.info('14- Enviando informacao que o arquivo foi baixado pra fila de salvar o processamento.')
-                const pageDownload = await browser.newPage()
-                await pageDownload.setViewport({ width: 0, height: 0 })
-                await SendLastDownloadToQueue(pageDownload, settings)
-                if (pageDownload) { await pageDownload.close() }
 
                 settings.pageFinal = settings.pageFinal + 20
                 settings.pageFinal = settings.pageFinal > settings.qtdPagesTotal ? settings.qtdPagesTotal : settings.pageFinal

@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer'
+import { Page } from 'playwright'
 
 import { ISettingsNFeGoias } from './_interfaces'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
@@ -14,11 +14,11 @@ function getSituationNF (situationNotaFiscal: string): string {
 export async function InputModeloToDownload (page: Page, settings: ISettingsNFeGoias): Promise<void> {
     try {
         await page.waitForSelector('#cmpModelo')
-        await page.select('#cmpModelo', settings.modelNotaFiscal)
+        await page.selectOption('#cmpModelo', settings.modelNotaFiscal)
 
         if (settings.situationNotaFiscal !== '0' && settings.situationNotaFiscal !== '1') {
             await page.waitForSelector('#cmpSituacao')
-            await page.select('#cmpSituacao', getSituationNF(settings.situationNotaFiscal))
+            await page.selectOption('#cmpSituacao', getSituationNF(settings.situationNotaFiscal))
         }
     } catch (error) {
         settings.typeLog = 'error'

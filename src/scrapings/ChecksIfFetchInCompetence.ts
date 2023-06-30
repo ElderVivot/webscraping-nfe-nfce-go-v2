@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { Page } from 'puppeteer'
+import { Page } from 'playwright'
 
 import { makeDateImplementation } from '@common/adapters/date/date-factory'
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'

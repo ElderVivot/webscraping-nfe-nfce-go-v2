@@ -1,11 +1,11 @@
-import { Page, Browser } from 'puppeteer'
+import { Page, Browser } from 'playwright'
 
 import { ISettingsNFeGoias } from './_interfaces'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 export async function LoguinCertificado (page: Page, browser: Browser, settings: ISettingsNFeGoias): Promise<void> {
     try {
-        await page.goto('https://nfeweb.sefaz.go.gov.br/nfeweb/sites/nfe/consulta-publica', { waitUntil: 'networkidle2', timeout: 90000 })
+        await page.goto('https://nfeweb.sefaz.go.gov.br/nfeweb/sites/nfe/consulta-publica', { waitUntil: 'networkidle', timeout: 90000 })
         await page.waitForSelector('#filtro')
     } catch (error) {
         settings.typeLog = 'error'

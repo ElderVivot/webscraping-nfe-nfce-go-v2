@@ -1,4 +1,4 @@
-import { Page, Browser } from 'puppeteer'
+import { Page, Browser } from 'playwright'
 
 import { ISettingsNFeGoias } from './_interfaces'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'

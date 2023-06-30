@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer'
+import { Page } from 'playwright'
 
 import { makeDateImplementation } from '@common/adapters/date/date-factory'
 

@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer'
+import { Page } from 'playwright'
 
 // import { promiseTimeOut } from '@utils/promise-timeout'
 
@@ -27,7 +27,7 @@ export async function GoesThroughCaptcha (page: Page, settings: ISettingsNFeGoia
 
         // await page.evaluate(`document.getElementById("g-recaptcha-response").innerHTML="${response}";`)
         await Promise.all([
-            page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 500000 }),
+            page.waitForNavigation({ waitUntil: 'networkidle', timeout: 500000 }),
             page.click('#btnPesquisar')
         ])
     } catch (error) {

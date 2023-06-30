@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer'
+import { Page } from 'playwright'
 
 import { logger } from '@common/log'
 import { promiseTimeOut } from '@utils/promise-timeout'

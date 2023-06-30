@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer'
+import { Page } from 'playwright'
 
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { handlesFetchError } from '@common/error/fetchError'
@@ -23,7 +23,7 @@ async function saveScreenshot (page: Page, settings: ISettingsNFeGoias) {
         const fetchFactory = makeFetchImplementation()
         const urlBase = `${urlBaseApi}/log_nota_fiscal`
 
-        const screenshot = await page.screenshot({ encoding: 'base64', type: 'png', fullPage: true })
+        const screenshot = await page.screenshot({ type: 'png', fullPage: true })
         await fetchFactory.patch<ILogNotaFiscalApi[]>(
             `${urlBase}/${settings.idLogNotaFiscal}/upload_print_log`,
             {
@@ -42,7 +42,7 @@ export async function GetQuantityNotes (page: Page, settings: ISettingsNFeGoias)
     try {
         await page.waitForTimeout(3000)
 
-        await saveScreenshot(page, settings)
+        // await saveScreenshot(page, settings)
 
         const qtdNotes = await getQtdNotes(page)
         return qtdNotes

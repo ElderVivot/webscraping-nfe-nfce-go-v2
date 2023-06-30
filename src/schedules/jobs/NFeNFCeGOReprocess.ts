@@ -94,6 +94,9 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
     }
 }
 
+processNotes('error').then(_ => console.log(_))
+processNotes('to_process').then(_ => console.log(_))
+
 export const jobError = new CronJob(
     '12 * * * *',
     async function () {

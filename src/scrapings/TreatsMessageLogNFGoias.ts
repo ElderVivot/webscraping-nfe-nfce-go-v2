@@ -1,4 +1,4 @@
-import { Browser, Page } from 'puppeteer'
+import { Browser, Page } from 'playwright'
 
 import { IFetchAdapter } from '@common/adapters/fetch/fetch-adapter'
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
@@ -56,17 +56,17 @@ export class TreatsMessageLogNFeGoias {
                     )
                     if (response.status >= 400) throw response
 
-                    if (this.page) {
-                        const screenshot = await this.page.screenshot({ encoding: 'base64', type: 'png', fullPage: true })
+                    // if (this.page) {
+                    //     const screenshot = await this.page.screenshot({ type: 'png', fullPage: true })
 
-                        await this.fetchFactory.patch<ILogNotaFiscalApi[]>(
-                            `${urlBase}/${this.settings.idLogNotaFiscal}/upload_print_log`,
-                            {
-                                bufferImage: screenshot
-                            },
-                            { headers: { tenant: process.env.TENANT } }
-                        )
-                    }
+                    //     await this.fetchFactory.patch<ILogNotaFiscalApi[]>(
+                    //         `${urlBase}/${this.settings.idLogNotaFiscal}/upload_print_log`,
+                    //         {
+                    //             bufferImage: screenshot
+                    //         },
+                    //         { headers: { tenant: process.env.TENANT } }
+                    //     )
+                    // }
                 } else {
                     const response = await this.fetchFactory.post<ILogNotaFiscalApi[]>(
                         `${urlBase}`,

@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer'
+import { Page } from 'playwright'
 
 import { ISettingsNFeGoias } from './_interfaces'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
@@ -12,12 +12,12 @@ export async function ChangeCnpj (page: Page, settings: ISettingsNFeGoias): Prom
         await page.waitForSelector('#cmpCnpj')
         // await page.select('#cmpCnpj', settings.federalRegistration)
 
-        await page.evaluate((federalRegistration, selector) => {
-            const sel = document.querySelector<IElement>(selector)
-            for (const option of [...Array.from(document.querySelectorAll<IElement>(selector + ' option'))]) {
+        await page.evaluate((federalRegistration) => {
+            const sel = document.querySelector<IElement>('#cmpCnpj')
+            for (const option of [...Array.from(document.querySelectorAll<IElement>('#cmpCnpj option'))]) {
                 if (federalRegistration === option.value) sel.value = option.value
             }
-        }, settings.federalRegistration, '#cmpCnpj')
+        }, settings.federalRegistration)
     } catch (error) {
         settings.typeLog = 'error'
         settings.messageLog = 'ChangeCnpj'
