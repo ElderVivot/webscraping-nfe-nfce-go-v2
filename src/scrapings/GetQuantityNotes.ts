@@ -27,7 +27,6 @@ async function saveScreenshot (page: Page, settings: ISettingsNFeGoias) {
 
         const screenshot = await page.screenshot({ type: 'png', fullPage: true })
         const resultUpload = await s3.upload(screenshot, `${process.env.TENANT}/log-nota-fiscal`, 'png', 'image/png', 'bayhero-logs-functional')
-        console.log(resultUpload)
 
         const { urlPrintLog } = settings
         if (urlPrintLog) {

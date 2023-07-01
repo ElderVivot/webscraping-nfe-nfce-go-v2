@@ -16,7 +16,7 @@ export async function CheckIfSemResultados (page: Page, settings: ISettingsNFeGo
         if (semResultado.indexOf('CAPTCHA INVALIDO') >= 0) {
             throw 'CAPTCHA_INVALID'
         }
-        if (semResultado.indexOf('HOUVE UM ERRO NA OPERACAO') >= 0) {
+        if (semResultado.indexOf('HOUVE UM ERRO NA OPERA') >= 0) {
             throw 'ERROR_SEARCH_NOTES_AFTER_CAPTCHA'
         }
     } catch (error) {
