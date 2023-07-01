@@ -44,6 +44,8 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
 
         if (data.length > 0) {
             for (const logNotaFiscal of data) {
+                if (logNotaFiscal.modelNotaFiscal === '57') continue // site goias with problem
+
                 try {
                     let settings: ISettingsNFeGoias = {
                         idLogNotaFiscal: logNotaFiscal.idLogNotaFiscal,
@@ -59,7 +61,8 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
                         dateStartDown: new Date(logNotaFiscal.dateStartDown),
                         dateEndDown: new Date(logNotaFiscal.dateEndDown),
                         pageInicial: logNotaFiscal.pageInicial,
-                        pageFinal: logNotaFiscal.pageFinal
+                        pageFinal: logNotaFiscal.pageFinal,
+                        urlPrintLog: logNotaFiscal.urlPrintLog
                     }
 
                     if (settings.federalRegistration.length < 14) {
@@ -94,8 +97,9 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
     }
 }
 
-processNotes('error').then(_ => console.log(_))
-processNotes('to_process').then(_ => console.log(_))
+// processNotes('error').then(_ => console.log(_))
+// processNotes('to_process').then(_ => console.log(_))
+// processNotes('warning').then(_ => console.log(_))
 
 export const jobError = new CronJob(
     '12 * * * *',

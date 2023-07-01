@@ -16,6 +16,9 @@ export async function CheckIfSemResultados (page: Page, settings: ISettingsNFeGo
         if (semResultado.indexOf('CAPTCHA INVALIDO') >= 0) {
             throw 'CAPTCHA_INVALID'
         }
+        if (semResultado.indexOf('HOUVE UM ERRO NA OPERACAO') >= 0) {
+            throw 'ERROR_SEARCH_NOTES_AFTER_CAPTCHA'
+        }
     } catch (error) {
         if (error === 'NOT_EXIST_NOTES' || error === 'CAPTCHA_INVALID') {
             settings.messageLog = 'CheckIfSemResultados'
@@ -26,6 +29,9 @@ export async function CheckIfSemResultados (page: Page, settings: ISettingsNFeGo
             } else if (error === 'CAPTCHA_INVALID') {
                 settings.typeLog = 'error'
                 settings.messageLogToShowUser = 'Erro ao passar pelo Captcha.'
+            } else if (error === 'ERROR_SEARCH_NOTES_AFTER_CAPTCHA') {
+                settings.typeLog = 'error'
+                settings.messageLogToShowUser = 'Erro ao consultar as notas.'
             }
 
             const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)

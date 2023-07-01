@@ -8,7 +8,7 @@ import { prepareCertificateRegedit } from '@services/certificates/windows/prepar
 
 const ScrapingNotesJob = {
     key: 'ScrapingNotes',
-    async handle ({ data }): Promise<void> {
+    async handle ({ data }: {data: {settings: ISettingsNFeGoias}}): Promise<void> {
         try {
             const settings: ISettingsNFeGoias = data.settings
 

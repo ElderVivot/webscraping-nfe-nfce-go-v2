@@ -20,7 +20,7 @@
     "dependencies": {
         "@types/pem": "1.9.5",
         "@types/uuid": "^8.3.4",
-        "aws-sdk": "^2.1181.0",
+        "aws-sdk": "^2.1409.0",
         "axios": "^0.25.0",
         "bull": "3.16.0",
         "cron": "1.8.2",

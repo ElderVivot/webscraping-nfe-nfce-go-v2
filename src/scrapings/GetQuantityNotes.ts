@@ -1,11 +1,12 @@
 import { Page } from 'playwright'
 
-import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
+// import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { handlesFetchError } from '@common/error/fetchError'
 import { logger } from '@common/log'
+import { s3Factory } from '@services/s3'
 
-import { ILogNotaFiscalApi, ISettingsNFeGoias } from './_interfaces'
-import { urlBaseApi } from './_urlBaseApi'
+import { ISettingsNFeGoias } from './_interfaces'
+// import { urlBaseApi } from './_urlBaseApi'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 async function getQtdNotes (page: Page): Promise<number> {
@@ -20,17 +21,20 @@ async function getQtdNotes (page: Page): Promise<number> {
 
 async function saveScreenshot (page: Page, settings: ISettingsNFeGoias) {
     try {
-        const fetchFactory = makeFetchImplementation()
-        const urlBase = `${urlBaseApi}/log_nota_fiscal`
+        // const fetchFactory = makeFetchImplementation()
+        const s3 = s3Factory()
+        // const urlBase = `${urlBaseApi}/log_nota_fiscal`
 
         const screenshot = await page.screenshot({ type: 'png', fullPage: true })
-        await fetchFactory.patch<ILogNotaFiscalApi[]>(
-            `${urlBase}/${settings.idLogNotaFiscal}/upload_print_log`,
-            {
-                bufferImage: screenshot
-            },
-            { headers: { tenant: process.env.TENANT } }
-        )
+        const resultUpload = await s3.upload(screenshot, `${process.env.TENANT}/log-nota-fiscal`, 'png', 'image/png', 'bayhero-logs-functional')
+        console.log(resultUpload)
+
+        const { urlPrintLog } = settings
+        if (urlPrintLog) {
+            const key = urlPrintLog.split('.com/')[1]
+            await this.awsS3.delete(key)
+        }
+        return resultUpload.Location
     } catch (error) {
         const responseAxios = handlesFetchError(error)
         if (responseAxios) logger.error(responseAxios)
@@ -38,14 +42,15 @@ async function saveScreenshot (page: Page, settings: ISettingsNFeGoias) {
     }
 }
 
-export async function GetQuantityNotes (page: Page, settings: ISettingsNFeGoias): Promise<number> {
+export async function GetQuantityNotes (page: Page, settings: ISettingsNFeGoias): Promise<ISettingsNFeGoias> {
     try {
         await page.waitForTimeout(3000)
 
-        // await saveScreenshot(page, settings)
+        settings.urlPrintLog = await saveScreenshot(page, settings)
 
         const qtdNotes = await getQtdNotes(page)
-        return qtdNotes
+        settings.qtdNotes = qtdNotes
+        return settings
     } catch (error) {
         settings.typeLog = 'error'
         settings.messageLog = 'GetQuantityNotes'
@@ -54,6 +59,5 @@ export async function GetQuantityNotes (page: Page, settings: ISettingsNFeGoias)
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, null, true)
         await treatsMessageLog.saveLog()
-        return 0
     }
 }

@@ -25,6 +25,7 @@ export interface ILogNotaFiscalApi {
     pageInicial: number
     pageFinal: number
     qtdPagesTotal: number
+    urlPrintLog: string
     taxRegime?: TTaxRegime
     codeCompanieAccountSystem?: string
     nameCompanie?: string
@@ -62,6 +63,7 @@ export interface ISettingsNFeGoias {
     pathFile?: string
     nameStep?: string
     errorResponseApi?: any
+    urlPrintLog?: string
 }
 
 export interface ICompanies {

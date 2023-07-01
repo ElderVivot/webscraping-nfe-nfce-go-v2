@@ -15,7 +15,7 @@ async function processNotes () {
 processNotes().then(_ => console.log(_))
 
 export const job00 = new CronJob(
-    '03 00 * * *',
+    '03 */8 * * *',
     async function () {
         await processNotes()
     },

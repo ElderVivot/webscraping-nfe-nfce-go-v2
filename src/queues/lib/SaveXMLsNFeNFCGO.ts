@@ -32,7 +32,8 @@ saveXMLsNFeNFCGOLib.on('failed', async (job, error) => {
             qtdTimesReprocessed: settings.qtdTimesReprocessed,
             pageInicial: settings.pageInicial,
             pageFinal: settings.pageFinal,
-            qtdPagesTotal: settings.qtdPagesTotal
+            qtdPagesTotal: settings.qtdPagesTotal,
+            urlPrintLog: settings.urlPrintLog
         }
 
         const urlBase = `${urlBaseApi}/log_nota_fiscal`
@@ -73,7 +74,8 @@ saveXMLsNFeNFCGOLib.on('completed', async (job) => {
             qtdTimesReprocessed: settings.qtdTimesReprocessed,
             pageInicial: settings.pageInicial,
             pageFinal: settings.pageFinal,
-            qtdPagesTotal: settings.qtdPagesTotal
+            qtdPagesTotal: settings.qtdPagesTotal,
+            urlPrintLog: settings.urlPrintLog
         }
 
         const urlBase = `${urlBaseApi}/log_nota_fiscal`

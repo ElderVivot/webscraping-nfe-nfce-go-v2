@@ -71,10 +71,9 @@ export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
             logger.info('9- Verificando se ha notas no filtro passado')
             await CheckIfSemResultados(page, settings)
 
-            const qtdNotesGlobal = await GetQuantityNotes(page, settings)
-            settings.qtdNotes = qtdNotesGlobal
-            const qtdPagesDivPer100 = Math.trunc(qtdNotesGlobal / 100)
-            const qtdPagesModPer100 = qtdNotesGlobal % 100
+            settings = await GetQuantityNotes(page, settings)
+            const qtdPagesDivPer100 = Math.trunc(settings.qtdNotes / 100)
+            const qtdPagesModPer100 = settings.qtdNotes % 100
             settings.qtdPagesTotal = (qtdPagesDivPer100 >= 1 ? qtdPagesDivPer100 : 0) + (qtdPagesModPer100 >= 1 ? 1 : 0)
             settings.pageInicial = 1
             settings.pageFinal = settings.qtdPagesTotal <= 20 ? settings.qtdPagesTotal : 20
