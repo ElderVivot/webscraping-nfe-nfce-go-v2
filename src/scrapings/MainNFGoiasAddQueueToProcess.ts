@@ -50,7 +50,8 @@ export class MainNFGoiasAddQueueToProcess {
         const data = response.data
         if (data.length > 0) {
             for (const companie of data) {
-                if (companie.eCpfCnpjCert !== 'eCNPJ' || companie.federalRegistration.length < 14) continue // only cnpj process
+                logger.info(`- Iniciando processamento da empresa ${companie.codeCompanieAccountSystem} - ${companie.name} - ${companie.federalRegistration} | tipo certificado ${companie.eCpfCnpjCert}`)
+                if ((companie.eCpfCnpjCert && companie.eCpfCnpjCert !== 'eCNPJ') || companie.federalRegistration.length < 14) continue // only cnpj process
 
                 settings.federalRegistration = companie.federalRegistration
                 for (const modelo of modelosNFe) {
@@ -71,7 +72,8 @@ export class MainNFGoiasAddQueueToProcess {
                                 for (const month of months) {
                                     settings.year = year
                                     settings.month = month
-                                    // const monthSring = functions.zeroLeft(month.toString(), 2)
+                                    const monthSring = functions.zeroLeft(month.toString(), 2)
+                                    logger.info(`- Processando modelo ${modelo} situacao ${situacao} mes ${monthSring}`)
                                     settings = cleanDataObject(settings, [], ['typeProcessing', 'wayCertificate', 'federalRegistration', 'modelNotaFiscal', 'situationNotaFiscal', 'year', 'month'])
 
                                     try {
@@ -84,10 +86,10 @@ export class MainNFGoiasAddQueueToProcess {
                                         settings.messageLog = 'QueueToProcess'
 
                                         settings.nameStep = `- Adicionando na fila empresa ${companie.codeCompanieAccountSystem} - ${companie.name} | ${settings.dateStartDown} a ${settings.dateEndDown}`
-
                                         logger.info(settings.nameStep)
                                         const treatsMessageLog = new TreatsMessageLogNFeGoias(null, settings, null, true)
                                         await treatsMessageLog.saveLog()
+                                        console.log('adicionado -------------------------------')
                                     } catch (error) {
                                         if (error.toString().indexOf('TreatsMessageLog') < 0) {
                                             logger.error(error)

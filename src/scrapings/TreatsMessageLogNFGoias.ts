@@ -92,6 +92,9 @@ export class TreatsMessageLogNFeGoias {
                 ...this.settings
             })
         }
+        if (this.settings.typeLog === 'warning') {
+            logger.info(this.settings.messageLogToShowUser)
+        }
 
         if (!this.noClosePage && this.page) await this.page.close()
         if (this.browser) await this.browser.close()
