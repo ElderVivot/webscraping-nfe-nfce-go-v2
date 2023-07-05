@@ -31,7 +31,7 @@ async function saveScreenshot (page: Page, settings: ISettingsNFeGoias) {
         const { urlPrintLog } = settings
         if (urlPrintLog) {
             const key = urlPrintLog.split('.com/')[1]
-            await this.awsS3.delete(key)
+            await s3.delete(key, 'bayhero-logs-functional')
         }
         return resultUpload.Location
     } catch (error) {

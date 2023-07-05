@@ -13,7 +13,11 @@ async function initiateCaptchaRequest (siteDetails: ISiteDetails): Promise<any> 
         googlekey: siteDetails.sitekey,
         key: process.env.API_2CAPTCHA,
         pageurl: siteDetails.pageurl,
-        json: 1
+        json: 1,
+        version: 'v3',
+        action: 'submit',
+        // eslint-disable-next-line camelcase
+        min_score: 0.9
     }
     const response = await request.post('http://2captcha.com/in.php', { form: formData })
     return JSON.parse(response).request

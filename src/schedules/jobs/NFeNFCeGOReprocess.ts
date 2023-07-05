@@ -97,7 +97,7 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
     }
 }
 
-// processNotes('error').then(_ => console.log(_))
+processNotes('error').then(_ => console.log(_))
 // processNotes('to_process').then(_ => console.log(_))
 // processNotes('warning').then(_ => console.log(_))
 

@@ -64,6 +64,7 @@ export interface ISettingsNFeGoias {
     nameStep?: string
     errorResponseApi?: any
     urlPrintLog?: string
+    tokenCaptcha?: string
 }
 
 export interface ICompanies {

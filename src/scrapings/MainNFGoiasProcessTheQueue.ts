@@ -1,6 +1,10 @@
 import { chromium } from 'playwright'
+// import { chromium } from 'playwright-extra'
+
+// import RecaptchaPlugin from '@extra/recaptcha'
 import 'dotenv/config'
 
+import ac from '@antiadmin/anticaptchaofficial'
 import { logger } from '@common/log'
 
 import { ISettingsNFeGoias } from './_interfaces'
@@ -17,9 +21,23 @@ import { InputModeloToDownload } from './InputModeloToDownload'
 import { InputPeriodToDownload } from './InputPeriodToDownload'
 import { LoguinCertificado } from './LoguinCertificado'
 
+const siteDetails = {
+    sitekey: '6LfEDl0mAAAAABhWuNT4woNL9joLptNe4rzEq4fr',
+    pageurl: 'https://nfeweb.sefaz.go.gov.br/nfeweb/sites/nfe/consulta-publica'
+}
+ac.setAPIKey(process.env.ANTI_CAPTCHA)
+
 export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
     try {
-        const browser = await chromium.launch({ headless: false, slowMo: 300, timeout: 120000 })
+        const token = await ac.solveRecaptchaV3(siteDetails.pageurl, siteDetails.sitekey, 0.9, 'submit')
+
+        if (!token) {
+            console.log('something went wrong')
+            return
+        }
+        settings.tokenCaptcha = token
+
+        const browser = await chromium.launch({ headless: false, slowMo: 300, timeout: 120000/*, devtools: true */ })
         const context = await browser.newContext({ ignoreHTTPSErrors: true })
 
         const { dateStartDown, dateEndDown, modelNotaFiscal, situationNotaFiscal, federalRegistration, pageInicial, pageFinal } = settings

@@ -1,4 +1,5 @@
 import { Page } from 'playwright'
+import 'dotenv/config'
 
 // import { promiseTimeOut } from '@utils/promise-timeout'
 
@@ -7,8 +8,8 @@ import { ISettingsNFeGoias } from './_interfaces'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
 // const siteDetails = {
-//     sitekey: '6LfTFzIUAAAAAKINyrQ9X5LPg4W3iTbyyYKzeUd3',
-//     pageurl: 'https://nfe.sefaz.go.gov.br/nfeweb/sites/nfe/consulta-publica'
+//     sitekey: '6LfEDl0mAAAAABhWuNT4woNL9joLptNe4rzEq4fr',
+//     pageurl: 'https://nfeweb.sefaz.go.gov.br/nfeweb/sites/nfe/consulta-publica'
 // }
 
 // async function captcha () {
@@ -25,7 +26,18 @@ export async function GoesThroughCaptcha (page: Page, settings: ISettingsNFeGoia
         //     throw 'TIME EXCEED - GOES THROUGH CAPTCHA'
         // }
 
-        // await page.evaluate(`document.getElementById("g-recaptcha-response").innerHTML="${response}";`)
+        // const grecaptcha: any = await page.evaluate('grecaptcha')
+        // console.log(grecaptcha)
+        const grecaptcha: any = {}
+        await page.evaluate((token) => {
+            grecaptcha.execute = function (sitekey, payLoad) {
+                console.log('called replaced execute function with sitekey ' + sitekey + ' and payload ', payLoad)
+                return new Promise((resolve) => {
+                    resolve(token)
+                })
+            }
+        }, settings.tokenCaptcha)
+
         await Promise.all([
             page.waitForNavigation({ waitUntil: 'networkidle', timeout: 500000 }),
             page.click('#btnPesquisar')
