@@ -1,5 +1,7 @@
 import poll from 'promise-poller'
 import request from 'request-promise-native'
+
+import { timeout } from '@utils/functions'
 import('dotenv/config')
 
 interface ISiteDetails {
@@ -46,6 +48,4 @@ function requestCaptchaResults (requestId: any) {
     }
 }
 
-const timeout = (millis: number): Promise<unknown> => new Promise(resolve => setTimeout(resolve, millis))
-
-export { initiateCaptchaRequest, pollForRequestResults, requestCaptchaResults, timeout }
+export { initiateCaptchaRequest, pollForRequestResults, requestCaptchaResults }

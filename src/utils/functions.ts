@@ -78,3 +78,5 @@ export function treateTextFieldTwo (value: string): string {
     const result = value.trim().normalize('NFD').replace(/([\u0300-\u036f]|[^0-9a-zA-Z.!+:><=)?$(/*,\-_ \\])/g, '').toUpperCase()
     return minimalizeSpaces(result)
 }
+
+export const timeout = (millis: number): Promise<unknown> => new Promise(resolve => setTimeout(resolve, millis))

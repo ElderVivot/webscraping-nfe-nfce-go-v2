@@ -4,8 +4,8 @@ import { chromium } from 'playwright'
 // import RecaptchaPlugin from '@extra/recaptcha'
 import 'dotenv/config'
 
-import ac from '@antiadmin/anticaptchaofficial'
 import { logger } from '@common/log'
+import { timeout } from '@utils/functions'
 
 import { ISettingsNFeGoias } from './_interfaces'
 import { ChangeCnpj } from './ChangeCnpj'
@@ -21,23 +21,17 @@ import { InputModeloToDownload } from './InputModeloToDownload'
 import { InputPeriodToDownload } from './InputPeriodToDownload'
 import { LoguinCertificado } from './LoguinCertificado'
 
-const siteDetails = {
-    sitekey: '6LfEDl0mAAAAABhWuNT4woNL9joLptNe4rzEq4fr',
-    pageurl: 'https://nfeweb.sefaz.go.gov.br/nfeweb/sites/nfe/consulta-publica'
-}
-ac.setAPIKey(process.env.ANTI_CAPTCHA)
-
 export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
     try {
-        const token = await ac.solveRecaptchaV3(siteDetails.pageurl, siteDetails.sitekey, 0.9, 'submit')
-
-        if (!token) {
-            console.log('something went wrong')
-            return
-        }
-        settings.tokenCaptcha = token
-
-        const browser = await chromium.launch({ headless: false, slowMo: 300, timeout: 120000/*, devtools: true */ })
+        // logger.info('0- Aguardando 30 segundos pra iniciar processamento')
+        await timeout(1000 * 60)
+        const browser = await chromium.launch({
+            headless: false,
+            slowMo: 300,
+            timeout: 120000
+            // proxy: { server: 'la.residential.rayobyte.com:8000', username: 'developervivot_gmail_com', password: '0P9O8i7u-country-BR' }
+            // proxy: { server: 'ultra.marsproxies.com:44443', username: 'mr27461bGlj', password: 'MpS8V9DwYn_country-br' }
+        })
         const context = await browser.newContext({ ignoreHTTPSErrors: true })
 
         const { dateStartDown, dateEndDown, modelNotaFiscal, situationNotaFiscal, federalRegistration, pageInicial, pageFinal } = settings
