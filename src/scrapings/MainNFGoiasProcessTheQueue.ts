@@ -5,7 +5,7 @@ import { chromium } from 'playwright'
 import 'dotenv/config'
 
 import { logger } from '@common/log'
-import { timeout } from '@utils/functions'
+// import { timeout } from '@utils/functions'
 
 import { ISettingsNFeGoias } from './_interfaces'
 import { ChangeCnpj } from './ChangeCnpj'
@@ -24,15 +24,25 @@ import { LoguinCertificado } from './LoguinCertificado'
 export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
     try {
         // logger.info('0- Aguardando 30 segundos pra iniciar processamento')
-        await timeout(1000 * 60)
+        // await timeout(1000 * 60)
         const browser = await chromium.launch({
             headless: false,
             slowMo: 300,
             timeout: 120000
+            // proxy: { server: 'per-context' }
             // proxy: { server: 'la.residential.rayobyte.com:8000', username: 'developervivot_gmail_com', password: '0P9O8i7u-country-BR' }
             // proxy: { server: 'ultra.marsproxies.com:44443', username: 'mr27461bGlj', password: 'MpS8V9DwYn_country-br' }
         })
-        const context = await browser.newContext({ ignoreHTTPSErrors: true })
+        const context = await browser.newContext(
+            {
+                ignoreHTTPSErrors: true
+                // proxy: {
+                //     server: process.env.PROXY_SERVER,
+                //     username: process.env.PROXY_USER,
+                //     password: process.env.PROXY_PASS
+                // }
+            }
+        )
 
         const { dateStartDown, dateEndDown, modelNotaFiscal, situationNotaFiscal, federalRegistration, pageInicial, pageFinal } = settings
 
