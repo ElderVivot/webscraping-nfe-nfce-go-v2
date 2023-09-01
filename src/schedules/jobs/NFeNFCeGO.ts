@@ -2,9 +2,11 @@ import { CronJob } from 'cron'
 
 import { logger } from '@common/log'
 import { MainNFGoiasAddQueueToProcess } from '@scrapings/MainNFGoiasAddQueueToProcess'
+import { mainDeleteCertificates } from '@services/certificates/windows/delete-certificates'
 
 async function processNotes () {
     try {
+        await mainDeleteCertificates(true) // delete only certificates expired
         const mainNFGoiasAddQueue = new MainNFGoiasAddQueueToProcess()
         await mainNFGoiasAddQueue.process()
     } catch (error) {

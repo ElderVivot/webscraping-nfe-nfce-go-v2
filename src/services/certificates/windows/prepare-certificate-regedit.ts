@@ -3,7 +3,7 @@ import path from 'path'
 import { logger } from '@common/log'
 import { ISettingsNFeGoias } from '@scrapings/_interfaces'
 
-import { mainDeleteCertificates } from './delete-certificates'
+// import { mainDeleteCertificates } from './delete-certificates'
 import { installCertificate } from './install-certificates'
 import { mainSetDefaultCertificateRegedit } from './set-default-certificate-regedit'
 
@@ -11,8 +11,8 @@ export async function prepareCertificateRegedit (fileCertificate: string, settin
     try {
         const nameFile = path.basename(fileCertificate)
 
-        logger.info('- Deletando certificados')
-        await mainDeleteCertificates(false)
+        // logger.info('- Deletando certificados')
+        // await mainDeleteCertificates(true)
 
         logger.info(`- Instalando certificado ${nameFile}`)
         await installCertificate(fileCertificate, settings.passwordCert)
