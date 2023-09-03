@@ -34,7 +34,6 @@
         "extract-zip": "^2.0.1",
         "find-process": "^1.4.7",
         "fs-extra": "9.0.1",
-        "got": "11.8.0",
         "node-powershell": "4.0.0",
         "nodejs-file-downloader": "^4.9.3",
         "pem": "1.14.4",
@@ -42,9 +41,6 @@
         "playwright": "1.35.1",
         "playwright-extra": "^4.3.6",
         "promise-poller": "1.9.1",
-        "request": "2.88.2",
-        "request-promise": "4.2.6",
-        "request-promise-native": "1.0.9",
         "rimraf": "3.0.2",
         "uuid": "^8.3.2",
         "xml2js": "0.4.23"

@@ -1,5 +1,5 @@
+import axios from 'axios'
 import poll from 'promise-poller'
-import request from 'request-promise-native'
 
 import { timeout } from '@utils/functions'
 import('dotenv/config')
@@ -21,8 +21,8 @@ async function initiateCaptchaRequest (siteDetails: ISiteDetails): Promise<any> 
         // eslint-disable-next-line camelcase
         min_score: 0.9
     }
-    const response = await request.post('http://2captcha.com/in.php', { form: formData })
-    return JSON.parse(response).request
+    const response = await axios.post('http://2captcha.com/in.php', { ...formData })
+    return response.request
 }
 
 async function pollForRequestResults (id: any, retries = 70, interval = 500, delay = 500): Promise<any> {
@@ -35,15 +35,14 @@ async function pollForRequestResults (id: any, retries = 70, interval = 500, del
     })
 }
 
-function requestCaptchaResults (requestId: any) {
+function requestCaptchaResults (requestId: any): any {
     const url = `http://2captcha.com/res.php?key=${process.env.API_2CAPTCHA}&action=get&id=${requestId}&json=1`
     return async function () {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise(async function (resolve, reject) {
-            const rawResponse = await request.get(url)
-            const resp = JSON.parse(rawResponse)
-            if (resp.status === 0) return reject(resp.request)
-            resolve(resp.request)
+            const response = await axios.get(url)
+            if (response.status === 0) return reject(response.request)
+            resolve(response.request)
         })
     }
 }
