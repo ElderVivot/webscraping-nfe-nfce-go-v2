@@ -38,6 +38,7 @@ export async function GetCnpjs (page: Page, browser: Browser, settings: ISetting
             settings.typeLog = 'warning'
             settings.messageError = 'DONT_EXIST_CNPJ_IN_SITE_NFE_FOR_THIS_CERTIFICATE'
             settings.messageLogToShowUser = 'Não existe nenhum CNPJ disponível na consulta do site de GO com esse certificado'
+            await browser.close()
         }
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, browser)
