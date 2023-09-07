@@ -44,7 +44,7 @@ export class MainNFGoiasAddQueueToProcess {
         logger.info('- Processando empresas pra adicionar na fila')
         const fetchFactory = makeFetchImplementation()
 
-        const urlBase = `${urlBaseApi}/companie?status=ACTIVE`
+        const urlBase = `${urlBaseApi}/companie?status=ACTIVE&typeFederalRegistration=cnpj`
         const response = await fetchFactory.get<ICompanies[]>(`${urlBase}`, { headers: { tenant: process.env.TENANT } })
         if (response.status >= 400) throw response
         const data = response.data
@@ -89,7 +89,6 @@ export class MainNFGoiasAddQueueToProcess {
                                         logger.info(settings.nameStep)
                                         const treatsMessageLog = new TreatsMessageLogNFeGoias(null, settings, null, true)
                                         await treatsMessageLog.saveLog()
-                                        console.log('adicionado -------------------------------')
                                     } catch (error) {
                                         if (error.toString().indexOf('TreatsMessageLog') < 0) {
                                             logger.error(error)
