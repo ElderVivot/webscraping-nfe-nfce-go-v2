@@ -19,7 +19,7 @@ export async function prepareCertificateRegedit (fileCertificate: string, settin
 
         if (deleteCertificateAllProcessing) {
             logger.info('- Deletando certificados')
-            await mainDeleteCertificates()
+            await mainDeleteCertificates(false)
         }
 
         logger.info(`- Instalando certificado ${nameFile}`)
