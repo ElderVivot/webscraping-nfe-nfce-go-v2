@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { ICertifate } from '@services/certificates/i-certificate'
 
@@ -5,6 +6,10 @@ import { cnaesOfCtesToIssuesNotes } from '../../database-local.json'
 import { ICompanies, ISettingsNFeGoias } from './_interfaces'
 import { urlBaseApi } from './_urlBaseApi'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
+
+const { COMPANIES_ONLY_ACTIVE } = process.env
+let companiesOnlyActive = true
+if (COMPANIES_ONLY_ACTIVE && COMPANIES_ONLY_ACTIVE !== 'true') companiesOnlyActive = false
 
 function checkIfCteCnaesAllowIssueNotes (cnaes: string): boolean {
     if (!cnaes) return true
@@ -31,8 +36,6 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
     try {
         const fetchFactory = makeFetchImplementation()
 
-        const companiesOnlyActive = process.env.COMPANIES_ONLY_ACTIVE === 'true'
-
         if (!companieArgument) {
             const responseCompanie = await fetchFactory.get<ICompanies>(`${urlBaseApi}/companie/${settings.idCompanie}`, { headers: { tenant: process.env.TENANT } })
             companie = responseCompanie.data
@@ -53,7 +56,7 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
         settings.wayCertificate = companie && companie.urlCert ? companie.urlCert : 'empty'
         settings.commomNameCert = companie && companie.commomNameCert ? companie.commomNameCert : ''
 
-        if (companiesOnlyActive && companie.stateCity !== 'GO') {
+        if (companie.stateCity !== 'GO') {
             throw 'COMPANIE_IS_NOT_STATE_GO'
         }
         if (companiesOnlyActive && !companie.stateRegistration) {

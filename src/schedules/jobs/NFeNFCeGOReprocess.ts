@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { CronJob } from 'cron'
 
 import { IDateAdapter } from '@common/adapters/date/date-adapter'
