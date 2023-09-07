@@ -12,7 +12,7 @@ export async function installCertificate (fileCertificate: string, password: str
     try {
         const pathInstallCertificate = path.resolve(__dirname, 'install-certificate.ps1')
 
-        const textCommand = `certutil -f -user -p ${password} -importPFX My "${fileCertificate}"`
+        const textCommand = `certutil -f -user -p '${password}' -importPFX My "${fileCertificate}"`
 
         fs.writeFile(
             pathInstallCertificate,
