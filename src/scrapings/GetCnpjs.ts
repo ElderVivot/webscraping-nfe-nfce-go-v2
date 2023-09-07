@@ -12,7 +12,7 @@ export async function GetCnpjs (page: Page, browser: Browser, settings: ISetting
     try {
         await page.waitForTimeout(1000)
         await page.waitForSelector('#cmpCnpj')
-        return await page.evaluate(() => {
+        const optionsCnpj = await page.evaluate(() => {
             const options: IOptionsCnpjsGoias[] = []
             const optionsAll = document.querySelectorAll('#cmpCnpj > option')
             optionsAll.forEach(value => {
@@ -23,6 +23,10 @@ export async function GetCnpjs (page: Page, browser: Browser, settings: ISetting
             })
             return options
         })
+        if (optionsCnpj.length === 0) {
+            throw 'DONT_EXIST_CNPJ_IN_SITE_NFE_FOR_THIS_CERTIFICATE'
+        }
+        return optionsCnpj
     } catch (error) {
         settings.typeLog = 'error'
         settings.messageLog = 'GetCnpjs'
@@ -30,8 +34,13 @@ export async function GetCnpjs (page: Page, browser: Browser, settings: ISetting
         settings.messageLogToShowUser = 'Erro ao capturar lista de CNPJs'
         settings.pathFile = __filename
 
+        if (error === 'DONT_EXIST_CNPJ_IN_SITE_NFE_FOR_THIS_CERTIFICATE') {
+            settings.typeLog = 'warning'
+            settings.messageError = 'DONT_EXIST_CNPJ_IN_SITE_NFE_FOR_THIS_CERTIFICATE'
+            settings.messageLogToShowUser = 'Não existe nenhum CNPJ disponível na consulta do site de GO com esse certificado'
+        }
+
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, browser)
-        // dont save in database because dont have information necessary to reprocess
-        await treatsMessageLog.saveLog(false)
+        await treatsMessageLog.saveLog(true)
     }
 }

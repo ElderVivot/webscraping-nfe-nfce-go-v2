@@ -1,4 +1,5 @@
 import path from 'path'
+import 'dotenv/config'
 
 import { logger } from '@common/log'
 import { ISettingsNFeGoias } from '@scrapings/_interfaces'

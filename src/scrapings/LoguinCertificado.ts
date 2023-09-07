@@ -15,7 +15,6 @@ export async function LoguinCertificado (page: Page, browser: Browser, settings:
         settings.pathFile = __filename
 
         const treatsMessageLog = new TreatsMessageLogNFeGoias(page, settings, browser)
-        // dont save in database because dont have information necessary to reprocess
-        await treatsMessageLog.saveLog(false)
+        await treatsMessageLog.saveLog(true)
     }
 }
