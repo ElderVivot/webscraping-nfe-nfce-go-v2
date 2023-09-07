@@ -46,35 +46,35 @@ export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
 
         const { dateStartDown, dateEndDown, modelNotaFiscal, situationNotaFiscal, federalRegistration, pageInicial, pageFinal } = settings
 
-        logger.info('1- Abrindo nova pagina')
-        const page = await context.newPage()
-
-        logger.info('2- Fazendo loguin com certificado')
-        await LoguinCertificado(page, browser, settings)
-
-        const urlActual = page.url()
-
-        logger.info('3- Checando se o CNPJ que esta sendo reprocessado eh o mesmo que esta setado no windows/regedit')
-        const optionsCnpjs = await GetCnpjs(page, browser, settings)
-        if (optionsCnpjs.filter(cnpj => cnpj.value === federalRegistration).length <= 0) {
-            await browser.close()
-            throw `CNPJ ${federalRegistration} not in list of cnpjs the certificate of windows/regedit ${optionsCnpjs}`
-        }
-
-        if (federalRegistration.length < 14) {
-            await browser.close()
-            throw `Dont CNPJ, is a CPF ${federalRegistration}`
-        }
-
-        settings.federalRegistration = federalRegistration
-        logger.info(`4- Iniciando processamento da empresa ${federalRegistration} - modelo ${modelNotaFiscal} - situacao ${situationNotaFiscal} - ${dateStartDown} a ${dateEndDown}`)
-
         try {
             settings.dateStartDown = new Date(dateStartDown)
             settings.dateEndDown = new Date(dateEndDown)
             settings.year = settings.dateStartDown.getFullYear()
             settings.month = settings.dateStartDown.getMonth() + 1
             settings.entradasOrSaidas = 'Saidas'
+
+            logger.info('1- Abrindo nova pagina')
+            const page = await context.newPage()
+
+            logger.info('2- Fazendo loguin com certificado')
+            await LoguinCertificado(page, browser, settings)
+
+            const urlActual = page.url()
+
+            logger.info('3- Checando se o CNPJ que esta sendo reprocessado eh o mesmo que esta setado no windows/regedit')
+            const optionsCnpjs = await GetCnpjs(page, browser, settings)
+            if (optionsCnpjs.filter(cnpj => cnpj.value === federalRegistration).length <= 0) {
+                await browser.close()
+                throw `CNPJ ${federalRegistration} not in list of cnpjs the certificate of windows/regedit ${optionsCnpjs}`
+            }
+
+            if (federalRegistration.length < 14) {
+                await browser.close()
+                throw `Dont CNPJ, is a CPF ${federalRegistration}`
+            }
+
+            settings.federalRegistration = federalRegistration
+            logger.info(`4- Iniciando processamento da empresa ${federalRegistration} - modelo ${modelNotaFiscal} - situacao ${situationNotaFiscal} - ${dateStartDown} a ${dateEndDown}`)
 
             await ChecksIfFetchInCompetence(page, settings)
 
