@@ -1,10 +1,9 @@
 import 'dotenv/config'
 
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
-import { ICertifate } from '@services/certificates/i-certificate'
 
 import { cnaesOfCtesToIssuesNotes } from '../../database-local.json'
-import { ICompanies, ISettingsNFeGoias } from './_interfaces'
+import { ICertifateApi, ICompanies, ISettingsNFeGoias } from './_interfaces'
 import { urlBaseApi } from './_urlBaseApi'
 import { TreatsMessageLogNFeGoias } from './TreatsMessageLogNFGoias'
 
@@ -40,10 +39,10 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
 
         settings.idCompanie = companie.idCompanie
         settings.federalRegistration = companie.federalRegistration
-        settings.codeCompanieAccountSystem = companie ? companie.codeCompanieAccountSystem : ''
-        settings.nameCompanie = companie ? companie.name : settings.nameCompanie
-        settings.wayCertificate = companie && companie.urlCert ? companie.urlCert : 'empty'
-        settings.commomNameCert = companie && companie.commomNameCert ? companie.commomNameCert : ''
+        settings.codeCompanieAccountSystem = companie.codeCompanieAccountSystem
+        settings.nameCompanie = companie.name
+        settings.wayCertificate = companie.urlCert ? companie.urlCert : 'empty'
+        settings.commomNameCert = companie.commomNameCert ? companie.commomNameCert : ''
 
         if (companie.stateCity !== 'GO') {
             throw 'COMPANIE_IS_NOT_STATE_GO'
@@ -62,9 +61,10 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
         }
 
         if (companie.idCertificate) {
-            const responseCertificate = await fetchFactory.get<ICertifate>(`${urlBaseApi}/certificate/${companie.idCertificate}/show_with_decrypt_password`, { headers: { tenant: process.env.TENANT } })
+            const responseCertificate = await fetchFactory.get<ICertifateApi>(`${urlBaseApi}/certificate/${companie.idCertificate}/show_with_decrypt_password`, { headers: { tenant: process.env.TENANT } })
             const certificate = responseCertificate.data
             settings.passwordCert = certificate ? certificate.passwordDecrypt : ''
+            settings.commomNameCert = certificate ? certificate.commomName : ''
         }
         return settings
     } catch (error) {

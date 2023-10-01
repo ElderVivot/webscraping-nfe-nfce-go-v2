@@ -115,3 +115,19 @@ export interface ICompanies {
     eCpfCnpjCert?: 'eCNPJ' | 'eCPF'
     dateEndDown?: string
 }
+
+export interface ICertifateApi {
+    idCertificate: string
+    createdAt:Date
+    updatedAt:Date
+    password: string
+    commomName: string
+    startDateValidity:Date
+    endDateValidity:Date
+    nameCert: string
+    federalRegistration: string
+    eCpfCnpj: 'eCPF' | 'eCNPJ'
+    urlSaved: string
+    hasProcurationEcac: boolean
+    passwordDecrypt?: string
+}
