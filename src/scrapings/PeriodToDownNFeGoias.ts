@@ -8,6 +8,8 @@ import { logger } from '@common/log'
 
 import { TSituationNotaFiscal } from './_interfaces'
 
+const DAY_PROCESS_DOWNOAD = Number(process.env.DAY_PROCESS_DOWNOAD) || 1
+
 const getDateStart = (dateFactory: IDateAdapter): Date => {
     const dateStart = dateFactory.subMonths(new Date(), Number(process.env.RETROACTIVE_MONTHS_TO_DOWNLOAD) || 0)
     dateStart.setDate(1)
@@ -15,7 +17,6 @@ const getDateStart = (dateFactory: IDateAdapter): Date => {
 }
 
 const getDateEnd = (situationNF = '2'): Date => {
-    // const dayFirstSearch = Number(process.env.DAY_FIRST_SEARCH) || 15
     const today = new Date()
     const dayToday = today.getDate()
 
@@ -27,18 +28,17 @@ const getDateEnd = (situationNF = '2'): Date => {
         if (dayNumber < dayToday && dayNumber !== 0) dayFirstSearch = dayNumber
     }
 
-    if (situationNF === '2') { // notes canceled
-        if (dayToday >= 2) {
-            return new Date(today.getFullYear(), today.getMonth(), 0)
+    // example -> if DAY_PROCESS_DOWNOAD = 2, then when day 2 or greather get date last month. Else day 1 get two months ago
+    if (dayToday >= DAY_PROCESS_DOWNOAD) {
+        if (situationNF === '2') {
+            if (dayToday >= 2) return new Date(today.getFullYear(), today.getMonth(), 0)
+            else throw 'DAY_ONE_DONT_DOWN_NOTES_CANCELED'
         } else {
-            throw 'DAY_ONE_DONT_DOWN_NOTES_CANCELED'
+            if (dayToday <= dayFirstSearch) return new Date(today.getFullYear(), today.getMonth(), 0)
+            else return new Date(today.getFullYear(), today.getMonth(), dayFirstSearch)
         }
     } else {
-        if (dayToday >= 1 && dayToday <= dayFirstSearch) {
-            return new Date(today.getFullYear(), today.getMonth(), 0)
-        } else {
-            return new Date(today.getFullYear(), today.getMonth(), dayFirstSearch)
-        }
+        return new Date(today.getFullYear(), today.getMonth() - 1, 0)
     }
 }
 

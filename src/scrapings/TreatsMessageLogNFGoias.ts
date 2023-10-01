@@ -40,6 +40,7 @@ export class TreatsMessageLogNFeGoias {
                 federalRegistration: this.settings.federalRegistration,
                 modelNotaFiscal: this.settings.modelNotaFiscal,
                 situationNotaFiscal: this.settings.situationNotaFiscal,
+                typeSearch: this.settings.typeSearch,
                 dateStartDown: this.settings.dateStartDown.toISOString(),
                 dateEndDown: this.settings.dateEndDown.toISOString(),
                 qtdNotesDown: this.settings.qtdNotes || 0,
@@ -52,21 +53,21 @@ export class TreatsMessageLogNFeGoias {
 
             const urlBase = `${urlBaseApi}/log_nota_fiscal`
             try {
-                if (this.settings.idLogNotaFiscal) {
-                    if (this.page) {
-                        const screenshot = await this.page.screenshot({ type: 'png', fullPage: true })
+                if (this.page) {
+                    const screenshot = await this.page.screenshot({ type: 'png', fullPage: true })
 
-                        const resultUpload = await this.s3.upload(screenshot, `${process.env.TENANT}/log-nota-fiscal`, 'png', 'image/png', 'bayhero-logs-functional')
+                    const resultUpload = await this.s3.upload(screenshot, `${process.env.TENANT}/log-nota-fiscal`, 'png', 'image/png', 'bayhero-logs-functional')
 
-                        const { urlPrintLog } = this.settings
-                        if (urlPrintLog) {
-                            const key = urlPrintLog.split('.com/')[1]
-                            await this.s3.delete(key, 'bayhero-logs-functional')
-                        }
-
-                        dataToSave.urlPrintLog = resultUpload.Location
+                    const { urlPrintLog } = this.settings
+                    if (urlPrintLog) {
+                        const key = urlPrintLog.split('.com/')[1]
+                        await this.s3.delete(key, 'bayhero-logs-functional')
                     }
 
+                    dataToSave.urlPrintLog = resultUpload.Location
+                }
+
+                if (this.settings.idLogNotaFiscal) {
                     const response = await this.fetchFactory.put<ILogNotaFiscalApi[]>(
                         `${urlBase}/${this.settings.idLogNotaFiscal}`,
                         { ...dataToSave },

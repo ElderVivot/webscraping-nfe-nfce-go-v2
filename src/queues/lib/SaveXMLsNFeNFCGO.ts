@@ -11,9 +11,29 @@ import { SaveXMLsNFeNFCGOJob } from '../jobs/SaveXMLsNFeNFCGO'
 
 const saveXMLsNFeNFCGOLib = new Queue(SaveXMLsNFeNFCGOJob.key, { redis: redisConfig })
 
-saveXMLsNFeNFCGOLib.on('failed', async (job, error) => {
+async function saveInApi (dataToSave: ILogNotaFiscalApi) {
     const fetchFactory = makeFetchImplementation()
 
+    const urlBase = `${urlBaseApi}/log_nota_fiscal`
+
+    if (dataToSave.idLogNotaFiscal) {
+        const response = await fetchFactory.put<ILogNotaFiscalApi[]>(
+            `${urlBase}/${dataToSave.idLogNotaFiscal}`,
+            { ...dataToSave },
+            { headers: { tenant: process.env.TENANT } }
+        )
+        if (response.status >= 400) throw response
+    } else {
+        const response = await fetchFactory.post<ILogNotaFiscalApi[]>(
+            `${urlBase}`,
+            { ...dataToSave },
+            { headers: { tenant: process.env.TENANT } }
+        )
+        if (response.status >= 400) throw response
+    }
+}
+
+saveXMLsNFeNFCGOLib.on('failed', async (job, error) => {
     const settings: ISettingsNFeGoias = job.data.settings
     try {
         const dataToSave: ILogNotaFiscalApi = {
@@ -26,6 +46,7 @@ saveXMLsNFeNFCGOLib.on('failed', async (job, error) => {
             federalRegistration: settings.federalRegistration,
             modelNotaFiscal: settings.modelNotaFiscal,
             situationNotaFiscal: settings.situationNotaFiscal,
+            typeSearch: settings.typeSearch,
             dateStartDown: new Date(settings.dateStartDown).toISOString(),
             dateEndDown: new Date(settings.dateEndDown).toISOString(),
             qtdNotesDown: settings.qtdNotes,
@@ -36,14 +57,7 @@ saveXMLsNFeNFCGOLib.on('failed', async (job, error) => {
             urlPrintLog: settings.urlPrintLog
         }
 
-        const urlBase = `${urlBaseApi}/log_nota_fiscal`
-
-        const response = await fetchFactory.put<ILogNotaFiscalApi[]>(
-            `${urlBase}/${dataToSave.idLogNotaFiscal}`,
-            { ...dataToSave },
-            { headers: { tenant: process.env.TENANT } }
-        )
-        if (response.status >= 400) throw response
+        await saveInApi(dataToSave)
     } catch (error) {
         const responseFetch = handlesFetchError(error)
         if (responseFetch) logger.error(responseFetch)
@@ -54,8 +68,6 @@ saveXMLsNFeNFCGOLib.on('failed', async (job, error) => {
 })
 
 saveXMLsNFeNFCGOLib.on('completed', async (job) => {
-    const fetchFactory = makeFetchImplementation()
-
     const settings: ISettingsNFeGoias = job.data.settings
     try {
         const dataToSave: ILogNotaFiscalApi = {
@@ -68,6 +80,7 @@ saveXMLsNFeNFCGOLib.on('completed', async (job) => {
             federalRegistration: settings.federalRegistration,
             modelNotaFiscal: settings.modelNotaFiscal,
             situationNotaFiscal: settings.situationNotaFiscal,
+            typeSearch: settings.typeSearch,
             dateStartDown: new Date(settings.dateStartDown).toISOString(),
             dateEndDown: new Date(settings.dateEndDown).toISOString(),
             qtdNotesDown: settings.qtdNotes,
@@ -78,13 +91,7 @@ saveXMLsNFeNFCGOLib.on('completed', async (job) => {
             urlPrintLog: settings.urlPrintLog
         }
 
-        const urlBase = `${urlBaseApi}/log_nota_fiscal`
-        const response = await fetchFactory.put<ILogNotaFiscalApi[]>(
-            `${urlBase}/${dataToSave.idLogNotaFiscal}`,
-            { ...dataToSave },
-            { headers: { tenant: process.env.TENANT } }
-        )
-        if (response.status >= 400) throw response
+        await saveInApi(dataToSave)
     } catch (error) {
         const responseFetch = handlesFetchError(error)
         if (responseFetch) logger.error(responseFetch)

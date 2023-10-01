@@ -7,7 +7,7 @@ import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { handlesFetchError } from '@common/error/fetchError'
 import { logger } from '@common/log'
 import { scrapingNotesLib } from '@queues/lib/ScrapingNotes'
-import { ILogNotaFiscalApi, ISettingsNFeGoias, TTaxRegime, TTypeLogNotaFiscal } from '@scrapings/_interfaces'
+import { ICompanies, ILogNotaFiscalApi, ISettingsNFeGoias, TTaxRegime, TTypeLogNotaFiscal } from '@scrapings/_interfaces'
 import { urlBaseApi } from '@scrapings/_urlBaseApi'
 import { CheckIfCompanieIsValid } from '@scrapings/CheckIfCompanieIsValid'
 
@@ -68,7 +68,26 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
                         throw `TreatsMessageLog - Dont CNPJ, is a CPF ${settings.federalRegistration}`
                     }
 
-                    settings = await CheckIfCompanieIsValid(settings)
+                    const companie: ICompanies = {
+                        idCompanie: logNotaFiscal.idCompanie,
+                        codeCompanieAccountSystem: logNotaFiscal.codeCompanieAccountSystem,
+                        typeFederalRegistration: logNotaFiscal.typeFederalRegistration,
+                        federalRegistration: logNotaFiscal.federalRegistration,
+                        name: logNotaFiscal.nameCompanie,
+                        cnaes: logNotaFiscal.cnaes,
+                        urlCert: logNotaFiscal.wayCertificate,
+                        commomNameCert: logNotaFiscal.commomNameCert,
+                        endDateValidityCert: logNotaFiscal.endDateValidityCert,
+                        stateCity: logNotaFiscal.stateCity,
+                        stateRegistration: logNotaFiscal.stateRegistration,
+                        dateInicialAsClient: logNotaFiscal.dateInicialAsClient,
+                        dateFinalAsClient: logNotaFiscal.dateFinalAsClient,
+                        dateInicialAsCompanie: logNotaFiscal.dateInicialAsCompanie,
+                        idCertificate: logNotaFiscal.idCertificate,
+                        status: logNotaFiscal.statusCompanie
+                    }
+
+                    settings = await CheckIfCompanieIsValid(settings, companie)
 
                     const jobId = `${logNotaFiscal.idCompanie}_${logNotaFiscal.federalRegistration}_${logNotaFiscal.modelNotaFiscal}_${logNotaFiscal.situationNotaFiscal}_${dateFactory.formatDate(settings.dateStartDown, 'yyyyMMdd')}_${dateFactory.formatDate(settings.dateEndDown, 'yyyyMMdd')}`
                     const job = await scrapingNotesLib.getJob(jobId)
@@ -97,7 +116,7 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
 }
 
 processNotes('error').then(_ => console.log(_))
-processNotes('to_process').then(_ => console.log(_))
+// processNotes('to_process').then(_ => console.log(_))
 // processNotes('warning').then(_ => console.log(_))
 
 export const jobError = new CronJob(

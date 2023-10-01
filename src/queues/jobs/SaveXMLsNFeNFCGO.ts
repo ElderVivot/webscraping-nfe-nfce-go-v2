@@ -1,10 +1,14 @@
+/* eslint-disable camelcase */
 import extractZip from 'extract-zip'
 import fsExtra from 'fs-extra'
 import path from 'path'
+import 'dotenv/config'
 
 import { logger } from '@common/log'
 import { ISettingsNFeGoias } from '@scrapings/_interfaces'
 import { createFolderToSaveData } from '@scrapings/CreateFolderToSaveData'
+
+const FOLDER_TO_SAVE_XMLs = process.env.FOLDER_TO_SAVE_XMLs || ''
 
 export const SaveXMLsNFeNFCGOJob = {
     key: 'SaveXMLsNFeNFCGO',
@@ -29,6 +33,12 @@ export const SaveXMLsNFeNFCGOJob = {
                 await fsExtra.copy(pathThatTheFileIsDownloaded, pathZip)
                 if (settings.situationNotaFiscal === '2') {
                     await extractZip(pathZip, { dir: pathRoutineAutomactic })
+                }
+            }
+            if (settings.codeCompanieAccountSystem && !pathRoutineAutomactic && FOLDER_TO_SAVE_XMLs.indexOf('codeCompanieRotinaAutomatica') > 0) {
+                const pathZip = path.resolve(pathThatTheFileIsDownloaded, nameFile.replace('.zip', ''))
+                if (settings.situationNotaFiscal === '2') {
+                    await extractZip(pathZip, { dir: pathThatTheFileIsDownloaded })
                 }
             }
             return Promise.resolve()

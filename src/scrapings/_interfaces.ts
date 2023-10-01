@@ -13,6 +13,7 @@ export interface ILogNotaFiscalApi {
     updatedAt?:Date
     modelNotaFiscal: TModelNotaFiscal
     situationNotaFiscal: TSituationNotaFiscal
+    typeSearch: string
     dateStartDown:string
     dateEndDown:string
     typeLog: TTypeLogNotaFiscal
@@ -29,6 +30,17 @@ export interface ILogNotaFiscalApi {
     taxRegime?: TTaxRegime
     codeCompanieAccountSystem?: string
     nameCompanie?: string
+    typeFederalRegistration?: ETypeFederalRegistration
+    cnaes?: string
+    commomNameCert?: string
+    endDateValidityCert?: Date
+    stateCity?: string
+    stateRegistration?: string
+    dateInicialAsClient?: Date
+    dateFinalAsClient?: Date
+    dateInicialAsCompanie?: Date
+    idCertificate?: string
+    statusCompanie?: ECompanieStatus
 }
 
 export interface ISettingsNFeGoias {
@@ -65,39 +77,41 @@ export interface ISettingsNFeGoias {
     errorResponseApi?: any
     urlPrintLog?: string
     tokenCaptcha?: string
+    typeSearch?: string
 }
 
 export interface ICompanies {
     idCompanie: string
-    createdAt: Date
-    updatedAt: Date
+    createdAt?: Date
+    updatedAt?: Date
     codeCompanieAccountSystem: string
     name: string
-    nickName: string
+    nickName?: string
     typeFederalRegistration: ETypeFederalRegistration
     federalRegistration: string
     stateRegistration: string
-    cityRegistration: string
+    cityRegistration?: string
     status: ECompanieStatus
-    dddPhone: number
-    phone: string
-    email: string
-    neighborhood: string
-    street: string
-    zipCode: string
-    complement: string
-    referency: string
+    dddPhone?: number
+    phone?: string
+    email?: string
+    neighborhood?: string
+    street?: string
+    zipCode?: string
+    complement?: string
+    referency?: string
     dateInicialAsCompanie: Date
     dateInicialAsClient: Date
     dateFinalAsClient: Date
     cnaes: string
-    taxRegime: '01' | '02' | '03' | '99'
-    idCity: number
+    taxRegime?: '01' | '02' | '03' | '99'
+    idCity?: number
     stateCity: string
-    nameCity: string
+    nameCity?: string
     urlCert: string
     endDateValidityCert: Date
     idCertificate: string
-    commomNameCert: string
-    eCpfCnpjCert: 'eCNPJ' | 'eCPF'
+    commomNameCert?: string
+    eCpfCnpjCert?: 'eCNPJ' | 'eCPF'
+    dateEndDown?: string
 }

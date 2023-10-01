@@ -1,4 +1,4 @@
-import { subHours, subDays, subMonths, parse, format } from 'date-fns'
+import { subHours, subDays, subMonths, parse, format, addDays } from 'date-fns'
 import { zonedTimeToUtc } from 'date-fns-tz'
 
 import { IDateAdapter } from './date-adapter'
@@ -28,5 +28,9 @@ export class DateImplementation implements IDateAdapter {
 
     formatDate (date: Date | number, formatString: string): string {
         return format(date, formatString)
+    }
+
+    addDays (date: number | Date, amount: number): Date {
+        return addDays(date, amount)
     }
 }

@@ -1,4 +1,5 @@
 import 'dotenv/config'
+
 import { makeFetchImplementation } from '@common/adapters/fetch/fetch-factory'
 import { ICertifate } from '@services/certificates/i-certificate'
 
@@ -31,26 +32,14 @@ function checkIfCompanieIsActiveInCompetence (settings: ISettingsNFeGoias, compa
     }
 }
 
-export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, companieArgument: ICompanies = null): Promise<ISettingsNFeGoias> {
-    let companie: ICompanies
+export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, companie: ICompanies): Promise<ISettingsNFeGoias> {
     try {
         const fetchFactory = makeFetchImplementation()
 
-        if (!companieArgument) {
-            const responseCompanie = await fetchFactory.get<ICompanies>(`${urlBaseApi}/companie/${settings.idCompanie}`, { headers: { tenant: process.env.TENANT } })
-            companie = responseCompanie.data
-
-            if (companie && companie.idCertificate) {
-                const responseCertificate = await fetchFactory.get<ICertifate>(`${urlBaseApi}/certificate/${companie.idCertificate}/show_with_decrypt_password`, { headers: { tenant: process.env.TENANT } })
-                const certificate = responseCertificate.data
-                settings.passwordCert = certificate ? certificate.passwordDecrypt : ''
-            }
-        } else {
-            companie = companieArgument
-        }
-
         checkIfCompanieIsActiveInCompetence(settings, companie, companiesOnlyActive)
 
+        settings.idCompanie = companie.idCompanie
+        settings.federalRegistration = companie.federalRegistration
         settings.codeCompanieAccountSystem = companie ? companie.codeCompanieAccountSystem : ''
         settings.nameCompanie = companie ? companie.name : settings.nameCompanie
         settings.wayCertificate = companie && companie.urlCert ? companie.urlCert : 'empty'
@@ -70,6 +59,12 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
         }
         if (companie.endDateValidityCert && new Date(companie.endDateValidityCert) < new Date()) {
             throw 'COMPANIE_WITH_CERTIFICATE_OVERDUE'
+        }
+
+        if (companie.idCertificate) {
+            const responseCertificate = await fetchFactory.get<ICertifate>(`${urlBaseApi}/certificate/${companie.idCertificate}/show_with_decrypt_password`, { headers: { tenant: process.env.TENANT } })
+            const certificate = responseCertificate.data
+            settings.passwordCert = certificate ? certificate.passwordDecrypt : ''
         }
         return settings
     } catch (error) {
