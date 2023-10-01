@@ -7,11 +7,11 @@ export async function ClickDownloadAll (page: Page, settings: ISettingsNFeGoias)
     try {
         await page.waitForTimeout(2000)
         await page.waitForSelector('.btn-download-all')
-        try {
-            await page.click('.last-click > a')
-        } catch (error) {
+        // try {
+        //     await page.click('.last-click > a')
+        // } catch (error) {
 
-        }
+        // }
         await page.click('.btn-download-all')
     } catch (error) {
         settings.typeLog = 'error'
