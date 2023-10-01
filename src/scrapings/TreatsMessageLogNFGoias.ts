@@ -57,7 +57,6 @@ export class TreatsMessageLogNFeGoias {
                     const screenshot = await this.page.screenshot({ type: 'png', fullPage: true })
 
                     const resultUpload = await this.s3.upload(screenshot, `${process.env.TENANT}/log-nota-fiscal`, 'png', 'image/png', 'bayhero-logs-functional')
-                    console.log(resultUpload)
 
                     const { urlPrintLog } = this.settings
                     if (urlPrintLog) {
