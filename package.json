@@ -38,7 +38,7 @@
         "nodejs-file-downloader": "^4.9.3",
         "pem": "1.14.4",
         "pino": "^7.6.3",
-        "playwright": "1.35.1",
+        "playwright": "1.29.1",
         "playwright-extra": "^4.3.6",
         "promise-poller": "1.9.1",
         "rimraf": "3.0.2",
