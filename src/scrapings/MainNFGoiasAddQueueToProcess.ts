@@ -91,6 +91,7 @@ export class MainNFGoiasAddQueueToProcess {
                                     settings.dateEndDown = lastDay
                                 }
                                 if (settings.situationNotaFiscal === '2') settings.typeSearch = 'fractional'
+                                settings.typeSearch = 'fractional'
 
                                 const urlBase = `${urlBaseApi}/log_nota_fiscal`
                                 const urlFilter = `/get_companies_that_dont_process_yet?dateStartDownBetween=${firstDayString}&dateEndDownBetween=${lastDayString}&modelNotaFiscal=${settings.modelNotaFiscal}&situationNotaFiscal=${settings.situationNotaFiscal}&typeSearch=${settings.typeSearch}`
