@@ -95,22 +95,27 @@ export class MainNFGoiasAddQueueToProcess {
 
                                 let page = 1
                                 const limit = 100
-                                const urlBase = `${urlBaseApi}/log_nota_fiscal`
-                                let urlFilter = `/get_companies_that_dont_process_yet?_page=${page}&_limit=${limit}&dateStartDownBetween=${firstDayString}&dateEndDownBetween=${lastDayString}&modelNotaFiscal=${settings.modelNotaFiscal}&situationNotaFiscal=${settings.situationNotaFiscal}&typeSearch=${settings.typeSearch}`
-                                let response = await fetchFactory.get<ICompanies[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
+                                const urlBase = `${urlBaseApi}/companie`
+                                let urlFilter = `/get_list_idCompanie?_page=${page}&_limit=${limit}`
+                                let response = await fetchFactory.get<{listIdCompanie: string}>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
                                 if (response.status >= 400) throw response
-                                let companies = response.data
+                                let { listIdCompanie } = response.data
 
-                                if (companies.length > 0) {
-                                    const qtdPages = Math.ceil(Number(response.headers['x-total-count']) / limit)
+                                const qtdPages = Math.ceil(Number(response.headers['x-total-count']) / limit)
 
-                                    for (let i = 1; i <= qtdPages; i++) {
-                                        if (i >= 2) {
-                                            page = i
-                                            urlFilter = `/get_companies_that_dont_process_yet?_page=${page}&_limit=${limit}&dateStartDownBetween=${firstDayString}&dateEndDownBetween=${lastDayString}&modelNotaFiscal=${settings.modelNotaFiscal}&situationNotaFiscal=${settings.situationNotaFiscal}&typeSearch=${settings.typeSearch}`
-                                            response = await fetchFactory.get<ICompanies[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
-                                            companies = response.data
-                                        }
+                                for (let i = 1; i <= qtdPages; i++) {
+                                    if (i >= 2) {
+                                        page = i
+                                        urlFilter = `/get_list_idCompanie?_page=${page}&_limit=${limit}`
+                                        response = await fetchFactory.get<{listIdCompanie: string}>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
+                                        listIdCompanie = response.data.listIdCompanie
+                                    }
+
+                                    if (listIdCompanie) {
+                                        const urlBaseLogNota = `${urlBaseApi}/log_nota_fiscal`
+                                        const urlFilterLogNota = `/get_companies_that_dont_process_yet?idCompanieList=${listIdCompanie}&dateStartDownBetween=${firstDayString}&dateEndDownBetween=${lastDayString}&modelNotaFiscal=${settings.modelNotaFiscal}&situationNotaFiscal=${settings.situationNotaFiscal}&typeSearch=${settings.typeSearch}`
+                                        const responseLogNota = await fetchFactory.get<ICompanies[]>(`${urlBaseLogNota}${urlFilterLogNota}`, { headers: { tenant: process.env.TENANT } })
+                                        const companies = responseLogNota.data
                                         for (const companie of companies) {
                                             try {
                                                 if (companie.dateEndDown) {
