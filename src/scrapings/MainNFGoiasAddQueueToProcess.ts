@@ -93,60 +93,72 @@ export class MainNFGoiasAddQueueToProcess {
                                 if (settings.situationNotaFiscal === '2') settings.typeSearch = 'fractional'
                                 settings.typeSearch = 'fractional'
 
+                                let page = 1
+                                const limit = 100
                                 const urlBase = `${urlBaseApi}/log_nota_fiscal`
-                                const urlFilter = `/get_companies_that_dont_process_yet?dateStartDownBetween=${firstDayString}&dateEndDownBetween=${lastDayString}&modelNotaFiscal=${settings.modelNotaFiscal}&situationNotaFiscal=${settings.situationNotaFiscal}&typeSearch=${settings.typeSearch}`
-                                const response = await fetchFactory.get<ICompanies[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
+                                let urlFilter = `/get_companies_that_dont_process_yet?_page=${page}&_limit=${limit}&dateStartDownBetween=${firstDayString}&dateEndDownBetween=${lastDayString}&modelNotaFiscal=${settings.modelNotaFiscal}&situationNotaFiscal=${settings.situationNotaFiscal}&typeSearch=${settings.typeSearch}`
+                                let response = await fetchFactory.get<ICompanies[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
                                 if (response.status >= 400) throw response
-                                const companies = response.data
+                                let companies = response.data
 
                                 if (companies.length > 0) {
-                                    for (const companie of companies) {
-                                        try {
-                                            if (companie.dateEndDown) {
-                                                const dateEndDownCompanie = new Date(companie.dateEndDown)
+                                    const qtdPages = Math.ceil(Number(response.headers['x-total-count']) / limit)
 
-                                                // companie already processed
-                                                if (dateEndDownCompanie >= new Date(settings.dateEndDown)) continue
-                                                else settings.dateStartDown = dateFactory.addDays(dateEndDownCompanie, 1)
-                                            } else {
-                                                settings.dateStartDown = firstDay
-                                            }
+                                    for (let i = 1; i <= qtdPages; i++) {
+                                        if (i >= 2) {
+                                            page = i
+                                            urlFilter = `/get_companies_that_dont_process_yet?_page=${page}&_limit=${limit}&dateStartDownBetween=${firstDayString}&dateEndDownBetween=${lastDayString}&modelNotaFiscal=${settings.modelNotaFiscal}&situationNotaFiscal=${settings.situationNotaFiscal}&typeSearch=${settings.typeSearch}`
+                                            response = await fetchFactory.get<ICompanies[]>(`${urlBase}${urlFilter}`, { headers: { tenant: process.env.TENANT } })
+                                            companies = response.data
+                                        }
+                                        for (const companie of companies) {
+                                            try {
+                                                if (companie.dateEndDown) {
+                                                    const dateEndDownCompanie = new Date(companie.dateEndDown)
 
-                                            // dateStart and dateEnd is equal
-                                            if (settings.dateStartDown >= settings.dateEndDown) continue
+                                                    // companie already processed
+                                                    if (dateEndDownCompanie >= new Date(settings.dateEndDown)) continue
+                                                    else settings.dateStartDown = dateFactory.addDays(dateEndDownCompanie, 1)
+                                                } else {
+                                                    settings.dateStartDown = firstDay
+                                                }
 
-                                            if (settings.situationNotaFiscal === '2' && todaySub32Days > lastDay) {
-                                                logger.info('NOTE_CANCELED_DONT_DOWN_SEPARATELY_IF_MORE_31_DAYS')
-                                                continue
-                                            }
+                                                // dateStart and dateEnd is equal
+                                                if (settings.dateStartDown >= settings.dateEndDown) continue
 
-                                            settings = await CheckIfCompanieIsValid(settings, companie)
+                                                if (settings.situationNotaFiscal === '2' && todaySub32Days > lastDay) {
+                                                    logger.info('NOTE_CANCELED_DONT_DOWN_SEPARATELY_IF_MORE_31_DAYS')
+                                                    continue
+                                                }
 
-                                            settings.typeLog = 'to_process'
-                                            settings.messageLogToShowUser = 'A Processar'
-                                            settings.messageLog = 'QueueToProcess'
-                                            settings.pageInicial = 0
-                                            settings.pageFinal = 0
-                                            settings.qtdNotes = 0
-                                            settings.qtdTimesReprocessed = 0
-                                            settings.qtdPagesTotal = 0
-                                            settings.urlPrintLog = ''
+                                                settings = await CheckIfCompanieIsValid(settings, companie)
 
-                                            logger.info(`- Adicionando na fila empresa ${companie.codeCompanieAccountSystem} - ${companie.name} | ${settings.dateStartDown.toISOString()} a ${settings.dateEndDown.toISOString()} | ${settings.modelNotaFiscal} - ${settings.situationNotaFiscal}`)
+                                                settings.typeLog = 'to_process'
+                                                settings.messageLogToShowUser = 'A Processar'
+                                                settings.messageLog = 'QueueToProcess'
+                                                settings.pageInicial = 0
+                                                settings.pageFinal = 0
+                                                settings.qtdNotes = 0
+                                                settings.qtdTimesReprocessed = 0
+                                                settings.qtdPagesTotal = 0
+                                                settings.urlPrintLog = ''
 
-                                            const jobId = `${settings.idCompanie}_${settings.federalRegistration}_${settings.modelNotaFiscal}_${settings.situationNotaFiscal}_${dateFactory.formatDate(settings.dateStartDown, 'yyyyMMdd')}_${dateFactory.formatDate(settings.dateEndDown, 'yyyyMMdd')}`
-                                            const job = await scrapingNotesLib.getJob(jobId)
-                                            if (job?.finishedOn) await job.remove() // remove job if already fineshed to process again, if dont fineshed yet, so dont process
+                                                logger.info(`- Adicionando na fila empresa ${companie.codeCompanieAccountSystem} - ${companie.name} | ${settings.dateStartDown.toISOString()} a ${settings.dateEndDown.toISOString()} | ${settings.modelNotaFiscal} - ${settings.situationNotaFiscal}`)
 
-                                            await scrapingNotesLib.add({
-                                                settings
-                                            }, {
-                                                jobId,
-                                                priority: priorityQueue(companie.taxRegime)
-                                            })
-                                        } catch (error) {
-                                            if (error.toString().indexOf('TreatsMessageLog') < 0) {
-                                                logger.error(error)
+                                                const jobId = `${settings.idCompanie}_${settings.federalRegistration}_${settings.modelNotaFiscal}_${settings.situationNotaFiscal}_${dateFactory.formatDate(settings.dateStartDown, 'yyyyMMdd')}_${dateFactory.formatDate(settings.dateEndDown, 'yyyyMMdd')}`
+                                                const job = await scrapingNotesLib.getJob(jobId)
+                                                if (job?.finishedOn) await job.remove() // remove job if already fineshed to process again, if dont fineshed yet, so dont process
+
+                                                await scrapingNotesLib.add({
+                                                    settings
+                                                }, {
+                                                    jobId,
+                                                    priority: priorityQueue(companie.taxRegime)
+                                                })
+                                            } catch (error) {
+                                                if (error.toString().indexOf('TreatsMessageLog') < 0) {
+                                                    logger.error(error)
+                                                }
                                             }
                                         }
                                     }
