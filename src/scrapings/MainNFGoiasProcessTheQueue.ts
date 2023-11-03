@@ -23,26 +23,16 @@ import { LoguinCertificado } from './LoguinCertificado'
 
 export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
     try {
+        await ChecksIfFetchInCompetence(null, settings)
+
         // logger.info('0- Aguardando 30 segundos pra iniciar processamento')
         // await timeout(1000 * 60)
         const browser = await chromium.launch({
             headless: false,
             slowMo: 300,
             timeout: 120000
-            // proxy: { server: 'per-context' }
-            // proxy: { server: 'la.residential.rayobyte.com:8000', username: 'developervivot_gmail_com', password: '0P9O8i7u-country-BR' }
-            // proxy: { server: 'ultra.marsproxies.com:44443', username: 'mr27461bGlj', password: 'MpS8V9DwYn_country-br' }
         })
-        const context = await browser.newContext(
-            {
-                ignoreHTTPSErrors: true
-                // proxy: {
-                //     server: process.env.PROXY_SERVER,
-                //     username: process.env.PROXY_USER,
-                //     password: process.env.PROXY_PASS
-                // }
-            }
-        )
+        const context = await browser.newContext({ ignoreHTTPSErrors: true })
 
         const { dateStartDown, dateEndDown, modelNotaFiscal, situationNotaFiscal, federalRegistration, pageInicial, pageFinal } = settings
 
@@ -75,8 +65,6 @@ export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
 
             settings.federalRegistration = federalRegistration
             logger.info(`4- Iniciando processamento da empresa ${federalRegistration} - modelo ${modelNotaFiscal} - situacao ${situationNotaFiscal} - ${dateStartDown} a ${dateEndDown}`)
-
-            await ChecksIfFetchInCompetence(page, settings)
 
             await page.goto(urlActual)
 
