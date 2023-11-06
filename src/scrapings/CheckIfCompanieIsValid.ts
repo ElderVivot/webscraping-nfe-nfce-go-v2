@@ -53,7 +53,7 @@ export async function CheckIfCompanieIsValid (settings: ISettingsNFeGoias, compa
         if (settings.modelNotaFiscal === '57' && !checkIfCteCnaesAllowIssueNotes(companie.cnaes)) {
             throw 'COMPANIE_DONT_HAVE_CNAES_ALLOW_TO_ISSUE_CTES'
         }
-        if (!companie.urlCert) {
+        if (!companie.urlCert || companie.urlCert === 'empty') {
             throw 'COMPANIE_DONT_HAVE_CERTIFICATE'
         }
         if (companie.endDateValidityCert && new Date(companie.endDateValidityCert) < new Date()) {

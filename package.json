@@ -35,7 +35,7 @@
         "find-process": "^1.4.7",
         "fs-extra": "9.0.1",
         "node-powershell": "4.0.0",
-        "nodejs-file-downloader": "^4.9.3",
+        "nodejs-file-downloader": "^4.12.1",
         "pem": "1.14.4",
         "pino": "^7.6.3",
         "playwright": "1.29.1",
