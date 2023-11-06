@@ -23,6 +23,14 @@ import { LoguinCertificado } from './LoguinCertificado'
 
 export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
     try {
+        const { dateStartDown, dateEndDown, modelNotaFiscal, situationNotaFiscal, federalRegistration, pageInicial, pageFinal } = settings
+
+        settings.dateStartDown = new Date(dateStartDown)
+        settings.dateEndDown = new Date(dateEndDown)
+        settings.year = settings.dateStartDown.getFullYear()
+        settings.month = settings.dateStartDown.getMonth() + 1
+        settings.entradasOrSaidas = 'Saidas'
+
         await ChecksIfFetchInCompetence(null, settings)
 
         // logger.info('0- Aguardando 30 segundos pra iniciar processamento')
@@ -33,16 +41,7 @@ export async function MainNFGoias (settings: ISettingsNFeGoias): Promise<void> {
             timeout: 120000
         })
         const context = await browser.newContext({ ignoreHTTPSErrors: true })
-
-        const { dateStartDown, dateEndDown, modelNotaFiscal, situationNotaFiscal, federalRegistration, pageInicial, pageFinal } = settings
-
         try {
-            settings.dateStartDown = new Date(dateStartDown)
-            settings.dateEndDown = new Date(dateEndDown)
-            settings.year = settings.dateStartDown.getFullYear()
-            settings.month = settings.dateStartDown.getMonth() + 1
-            settings.entradasOrSaidas = 'Saidas'
-
             logger.info('1- Abrindo nova pagina')
             const page = await context.newPage()
 

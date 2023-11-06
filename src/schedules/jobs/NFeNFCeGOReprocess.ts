@@ -100,7 +100,7 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
                         priority: priorityQueue(logNotaFiscal.taxRegime)
                     })
 
-                    logger.info(`- Reprocessando scraping ${logNotaFiscal.idLogNotaFiscal} referente a empresa ${logNotaFiscal.codeCompanieAccountSystem} - ${logNotaFiscal.nameCompanie} modelo ${logNotaFiscal.modelNotaFiscal} periodo ${logNotaFiscal.dateStartDown} a ${logNotaFiscal.dateEndDown}`)
+                    logger.info(`- Reprocessando scraping ${logNotaFiscal.idLogNotaFiscal} referente a empresa ${logNotaFiscal.codeCompanieAccountSystem} - ${settings.nameCompanie} modelo ${logNotaFiscal.modelNotaFiscal} periodo ${logNotaFiscal.dateStartDown} a ${logNotaFiscal.dateEndDown}`)
                 } catch (error) {
                     if (error.toString().indexOf('TreatsMessageLog') < 0) {
                         logger.error(error)
