@@ -20,6 +20,7 @@ export interface ILogNotaFiscalApi {
     messageLog: string
     messageLogToShowUser: string
     wayCertificate: string
+    urlCert?: string
     messageError: string
     qtdNotesDown: number
     qtdTimesReprocessed: number

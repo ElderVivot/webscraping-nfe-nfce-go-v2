@@ -75,7 +75,7 @@ async function processNotes (typeLog: TTypeLogNotaFiscal) {
                         federalRegistration: logNotaFiscal.federalRegistration,
                         name: logNotaFiscal.nameCompanie,
                         cnaes: logNotaFiscal.cnaes,
-                        urlCert: logNotaFiscal.wayCertificate,
+                        urlCert: logNotaFiscal.urlCert,
                         commomNameCert: logNotaFiscal.commomNameCert,
                         endDateValidityCert: logNotaFiscal.endDateValidityCert,
                         stateCity: logNotaFiscal.stateCity,
